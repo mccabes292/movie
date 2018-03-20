@@ -1,0 +1,125 @@
+---
+title: "Multi Omics Contribution Plot"
+author: "Sean McCabe"
+date: "March 7, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Standard Workflow
+
+#Data 
+
+This data is from Alex's paper.  Edit this to include whatever data will be used for the final paper.
+```{r,eval=F}
+library(readr)
+library(DESeq2)
+library(magrittr)
+library(dplyr)
+library(rafalib)
+library(ggplot2)
+library(cowplot)
+
+
+rnaData=read_delim("C:/Sean/UNC/Mike Love/pccca/AlexData/rnaData.txt",delim="\t")
+mirnaData=read_delim("C:/Sean/UNC/Mike Love/pccca/AlexData/mirnaData.txt",delim="\t")
+clinData=read.table("C:/Sean/UNC/Mike Love/pccca/AlexData/clinData.txt",sep="\t",header=T)
+
+#Subset to Breast Cancer Data
+x1=rnaData[,-1]
+x1=x1[,as.vector(t(clinData[2,-1]==1))]
+x2=mirnaData[,-1]
+x2=x2[,as.vector(t(clinData[2,-1]==1))]
+
+```
+
+
+#CV Analysis (PC-CCA)
+
+
+First conduct a CV analysis with the Multi-Omics method of your choice.  We will demonstrate how this can be done by using a principal components based CCA, where a standard Canonical Correlation Analysis is conducted on the a thresholded number of principal components for each matrix.  
+```{r,eval=F}
+library(CCA)
+library(caret)
+pc1=prcomp(t(x1))
+pc2=prcomp(t(x2))
+
+numC=50
+kFold=8
+set.seed(50)
+trainIndex=groupKFold(pc1$x[,1],k=kFold)
+
+cc1=cc(pc1$x[,1:numC],pc2$x[,1:numC])
+
+fullScore1=t(t(cc1$xcoef[,1])%*%t(pc1$x[,1:numC]))
+fullScore2=t(t(cc1$ycoef[,1])%*%t(pc2$x[,1:numC]))
+pc1Mat=pc1$x[,1:numC]
+pc2Mat=pc2$x[,1:numC]
+
+
+score1=matrix(rep(NA,kFold*nrow(pc1Mat)),ncol=kFold,nrow=nrow(pc1Mat))
+score2=matrix(rep(NA,kFold*nrow(pc1Mat)),ncol=kFold,nrow=nrow(pc2Mat))
+weights1=matrix(rep(NA,numC*kFold ),ncol=kFold,nrow=numC )
+weights2=matrix(rep(NA,numC*kFold ),ncol=kFold,nrow=numC)
+cors=rep(NA,kFold)
+binSize=ncol(x1)/kFold
+for(i in 1:kFold){
+  score1Temp=rep(NA,nrow(pc1Mat))
+  score2Temp=rep(NA,nrow(pc2Mat))
+  id1=trainIndex[[i]]
+  train1=pc1Mat[id1,]
+  train2=pc2Mat[id1,]
+  ccT=cc(train1,train2)
+  cors[i]=ccT$cor[1]
+  score1Temp[id1]=t(t(ccT$xcoef[,1])%*%t(train1))
+  score2Temp[id1]=t(t(ccT$ycoef[,1])%*%t(train2))
+
+  weights1[,i]=ccT$xcoef[,1]
+  weights2[,i]=ccT$ycoef[,1]
+  
+  fit1=t(weights1[,i])%*%t(pc1Mat[-id1,])
+  fit2=t(weights2[,i])%*%t(pc2Mat[-id1,])
+  score1[-id1,i]=fit1
+  score2[-id1,i]=fit2
+  
+  
+}
+fullWeights1=cc1$xcoef[,1]
+fullWeights2=cc1$ycoef[,1]
+
+scaledScore1=apply(score1,2,scale)
+scaledScore2=apply(score2,2,scale)
+rs1=rowSums(scaledScore1,na.rm=T)
+rs2=rowSums(scaledScore2,na.rm=T)
+
+idMem=(!is.na(score1)==1)%*%1:kFold
+
+```
+
+
+#Multi Omics Plots
+
+```{r,eval=F}
+
+cvScores1=rowSums(score1,na.rm=T)
+cvScores2=rowSums(score2,na.rm=T)
+cvScores=list(cvScores1,cvScores2)
+cvScores[[3]]=cvScores[[1]]
+cvScores[[4]]=cvScores[[1]]
+
+fullScores=list(fullScore1,fullScore2)
+fullScores[[3]]=fullScores[[1]]
+fullScores[[4]]=fullScores[[1]]
+
+
+t1=makeSamplePlotObject(fullScores,cvScores,idMem)
+plotSamplePlots(t1,4,xAxisPlot=1,yAxisPlot=2,colorVar=as.factor(idMem))
+plotSamplePlotGrid(t1,1)
+```
+
+
+
+
