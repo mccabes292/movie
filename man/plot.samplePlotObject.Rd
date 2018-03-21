@@ -4,7 +4,7 @@
 \alias{plot.samplePlotObject}
 \title{Make Contribution Plot}
 \usage{
-plot.samplePlotObject(sampleObject, plotType, xAxisPlot, yAxisPlot,
+\method{plot}{samplePlotObject}(sampleObject, plotType, xAxisPlot, yAxisPlot,
   colorVar = NULL, grid)
 }
 \arguments{

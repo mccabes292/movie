@@ -116,7 +116,7 @@ fullScores[[4]]=fullScores[[1]]
 
 
 t1=makeSamplePlotObject(fullScores,cvScores,idMem)
-plotSamplePlots(t1,4,xAxisPlot=1,yAxisPlot=2,colorVar=as.factor(idMem))
+plot(t1,"SideBySide",xAxisPlot=1,yAxisPlot=2,colorVar=as.factor(idMem),grid=F)
 plotSamplePlotGrid(t1,1)
 ```
 

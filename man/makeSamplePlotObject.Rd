@@ -2,7 +2,7 @@
 % Please edit documentation in R/makeSamplePlotObject.R
 \name{makeSamplePlotObject}
 \alias{makeSamplePlotObject}
-\title{To standardize and adjust "scores" from a cross validation multi-omics analysis where the "scores" need to be standardized and weighted to have similar results with the full analysis.}
+\title{Create Contribution Plot Object}
 \usage{
 makeSamplePlotObject(fullScores, cvScores, idMem)
 }

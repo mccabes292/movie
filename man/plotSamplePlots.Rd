@@ -4,12 +4,16 @@
 \alias{plotSamplePlots}
 \title{Create Sample Plots}
 \usage{
-plotSamplePlots(sampleObject, plotNum, xAxisPlot, yAxisPlot, colorVar = NULL)
+plotSamplePlots(sampleObject, plotType, xAxisPlot, yAxisPlot, colorVar = NULL)
 }
 \arguments{
 \item{sampleObject}{Object generated from \code{makeSamplePlotObject()}}
 
-\item{plotNum}{See plotSamplePlots()}
+\item{plotType}{Specifies the type of plot to be generated
+\code{"CV"} - CV Sample/Score Plot - (k-1) X (k-1) upper triangular grid where $plot_{i,j}$ Corresponds to the sample/score plot for matrix j+1 (x-axis) and i (y-axis)\cr\cr
+\code{"Full"} - Full Sample/Score Plot - Same gridded plot as above but now for the full scores i.e. the scores from the full analysis\cr\cr
+\code{"Comparison"} - Matrix Specific Score Plots - k plots (k is the number of matrices in the analysis) which plot the scores for the CV analysis vs. the scores for the full analysis\cr\cr
+\code{"SideBySide"} - Side by side plot of the CV and Full Plots}
 
 \item{xAxisPlot}{Index for which matrix should lie on the x-axis}
 
@@ -24,5 +28,5 @@ Specified plot.
 To create an individual plot from the grid produced by \code{plotSamplePlots()}
 }
 \examples{
-plotSamplePlots(sampleObject,plotNum,xAxisPlot,colorVar)
+plotSamplePlots(sampleObject,plotType,xAxisPlot,colorVar)
 }

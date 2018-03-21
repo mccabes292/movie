@@ -1,3 +1,5 @@
+#' Create Contribution Plot Object
+#' 
 #' To standardize and adjust "scores" from a cross validation multi-omics analysis where the "scores" need to be standardized and weighted to have similar results with the full analysis.
 #' @param fullScores List of unscaled "score vectors" for the analysis using all subjects.  The length of this list should be equivalent to the number of matrices that were used in the analysis and the length of each element should be n. 
 #' @param cvScores List of unscaled "score vectors" for the cross validation analysis.  The length of this list should be equivalent to the number of matrices that were used in the analysis and the length of each element should be n.
