@@ -1,0 +1,315 @@
+---
+title: "CV Analysis"
+author: "Sean McCabe"
+date: "April 17, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Cross Validation Analysis Workflow
+This vignette provides guidance for how to conduct a cross validation analysis for PCCCA, Sparse mCCA, AJIVE, and MOFA.  Please note that many of these methods are computationally intensive and should not be run interactively.  Additionally, it is recommended that the analysis be separated into separate jobs for each of the folds in order to finish the analysis in a reasonable amount of time.  We also recommend that you read the vignettes and software documentation for all of these methods and ensure that you are catering each method towards your data appropriately.  For the following workflow, we will be using breast cancer data from The Cancer Genome Atlas.  Included data types are RNA, miRNA, and Copy Number Variation.  The data is available [here](http://dlin.web.unc.edu/software/iboost/).
+
+#Dividing data into K Folds
+The first step in conducting a cross validation analysis is to divide the samples into one of K folds.  Determining K is up to the user's discretion however we recommend that you choose a K that ensures that each fold has at least 30 samples in order to avoid issues with the scaling which will be conducted further down the line.  For this analysis we will be using 5 folds.  In order to avoid imbalance between the folds, we will be creating the folds by stratifying across the first Principal Component of the RNA Seq data using the `caret` package.
+
+```{r,eval=F}
+library(caret)
+library(magrittr)
+kFold=5
+pc1=prcomp(t(rna))
+trainIndex=groupKFold(pc1$x[,1],k=kFold)
+foldMem=rep(0,ncol(rna))
+for(i in 1:kFold){
+  foldMem=foldMem+i*!(1:ncol(rna) %in% trainIndex[[i]])
+}
+
+```
+
+`foldMem` now corresponds to the fold in which each sample is left out and will therefore be included in the testing set.  We can now begin calculating the full and cross validation contributions for each of the four methods.
+
+
+#PC-CCA
+PC-CCA involves a simple Canonical Correlation Analysis on the top specified number of PCs which will be indicated in our code as `numPC`.  Determining the number of PCs to include in such an analysis is an area which is widely debated but one of the methods of thresholding is by selecting the number of components which correspond to the "elbow" of the scree plot.  For this analysis we will be greedy in our selection of this number and will choose 100.  Please note that this may not be a wise choice for your own data.  Unfortunately CCA is a method that can only be conducted on two matrices and therefore we will use RNA and miRNA for this analysis.  The only additional software package we need is the `CCA` package available through CRAN.
+
+First we will obtain the full analysis contributions for each of our three data matrices.
+```{r,eval=F}
+library(CCA)
+numPC=50
+
+pc2=prcomp(t(mirna))
+
+cc1=cc(pc1$x[,1:numPC],pc2$x[,1:numPC])
+
+fullContributionRNA_PCCCA=t(t(cc1$xcoef[,1])%*%t(pc1$x[,1:numPC]))
+fullContributionmiRNA_PCCCA=t(t(cc1$ycoef[,1])%*%t(pc2$x[,1:numPC]))
+
+fullContribution_PCCCA=list("RNA"=fullContributionRNA_PCCCA,"miRNA"=fullContributionmiRNA_PCCCA)
+```
+
+We now proceed in obtaining the Cross Validated Contributions in the following manner.  If you are interested in the weights for each of the folds, you can modify the below code to accommodate this.
+
+```{r,eval=F}
+pc1Mat=pc1$x[,1:numPC]
+pc2Mat=pc2$x[,1:numPC]
+
+cvContributionRNAMat_PCCCA=matrix(rep(NA,kFold*nrow(pc1Mat)),ncol=kFold,nrow=nrow(pc1Mat))
+cvContributionmiRNAMat_PCCCA=matrix(rep(NA,kFold*nrow(pc1Mat)),ncol=kFold,nrow=nrow(pc2Mat))
+
+for(i in 1:kFold){
+  cont1Temp=rep(NA,nrow(pc1Mat))
+  cont2Temp=rep(NA,nrow(pc2Mat))
+  
+  id1=(foldMem!=i)
+  
+  train1=pc1Mat[id1,]
+  train2=pc2Mat[id1,]
+  ccT=cc(train1,train2)
+
+  cont1Temp[id1]=t(t(ccT$xcoef[,1])%*%t(train1))
+  cont2Temp[id1]=t(t(ccT$ycoef[,1])%*%t(train2))
+
+  weights1Temp=ccT$xcoef[,1]
+  weights2Temp=ccT$ycoef[,1]
+  
+  fit1=t(weights1Temp)%*%t(pc1Mat[-id1,])
+  fit2=t(weights2Temp)%*%t(pc2Mat[-id1,])
+  cvContributionRNAMat_PCCCA[-id1,i]=fit1
+  cvContributionmiRNAMat_PCCCA[-id1,i]=fit2
+  
+  
+}
+
+cvContributionRNA_PCCCA=rowSums(cvContributionRNAMat_PCCCA,na.rm=T)
+cvContributionmiRNA_PCCCA=rowSums(cvContributionmiRNAMat_PCCCA,na.rm=T)
+
+cvContribution_PCCCA=list("RNA"=cvContributionRNA_PCCCA,"miRNA"=cvContributionmiRNA_PCCCA)
+```
+
+
+#Sparse mCCA
+The pipeline for Sparse mCCA is analogous to PCCCA, however now we can include our third data matrix (CNV).  Software for Sparse mCCA is available through CRAN in the `PMA` package and we encourage you to read their [documentation](https://cran.r-project.org/web/packages/PMA/index.html) to ensure that you are analyzing your data in the correct manner.
+
+As in PCCCA, we first aim to obtain the full weights.  Note that Sparse mCCA requires that the samples be on the rows and the features to be on the columns. 
+```{r,eval=F}
+library(PMA)
+
+moData=list(t(cnv),t(rna),t(mirna))
+x1=moData[[1]]
+x2=moData[[2]]
+x3=moData[[3]]
+
+fullMCCA=MultiCCA.permute(moData)
+fullMCCA2=MultiCCA(moData,penalty=fullMCCA$bestpenalties)
+
+fullContribution_CNV_MCCA=moData[[1]]%*%fullMCCA2$ws[[1]]
+fullContribution_RNA_MCCA=moData[[2]]%*%fullMCCA2$ws[[2]]
+fullContribution_miRNA_MCCA=moData[[3]]%*%fullMCCA2$ws[[3]]
+
+fullContribution_MCCA=list("CNV"=fullContribution_CNV_MCCA,"RNA"=fullContribution_RNA_MCCA,"miRNA"=fullContribution_miRNA_MCCA)
+```
+
+Next we will proceed with finding the Cross Validated Contribution.  While the computation time for this step may not be overly burdensome to run on a cluster, it may be wise to separate each fold into a separate job to speed up the analysis.
+
+```{r,eval=F}
+
+cvContribution_CNV_MCCA_Mat=matrix(rep(NA,kFold*ncol(cnv)),ncol=kFold,nrow=ncol(cnv))
+cvContribution_RNA_MCCA_Mat=matrix(rep(NA,kFold*ncol(rna)),ncol=kFold,nrow=ncol(rna))
+cvContribution_miRNA_MCCA_Mat=matrix(rep(NA,kFold*ncol(mirna)),ncol=kFold,nrow=ncol(mirna))
+
+for(i in 1:kFold){
+  id1=which(foldMem!=i)
+  train1=x1[id1,]
+  train2=x2[id1,]
+  train3=x3[id1,]
+  
+  
+  tempMCCA=MultiCCA.permute(list(train1,train2,train3))
+  tempMCCA2=MultiCCA(list(train1,train2,train3),penalty=tempMCCA$bestpenalties)
+  
+  
+  fit1=x1[-id1,]%*%tempMCCA2$ws[[1]]
+  fit2=x2[-id1,]%*%tempMCCA2$ws[[2]]
+  fit3=x3[-id1,]%*%tempMCCA2$ws[[3]]
+  
+  
+  cvContribution_CNV_MCCA_Mat[-id1,i]=fit1
+  cvContribution_RNA_MCCA_Mat[-id1,i]=fit2
+  cvContribution_miRNA_MCCA_Mat[-id1,i]=fit3
+  
+  
+}
+
+cvContribution_CNV_MCCA=rowSums(cvContribution_CNV_MCCA_Mat,na.rm=T)
+cvContribution_RNA_MCCA=rowSums(cvContribution_RNA_MCCA_Mat,na.rm=T)
+cvContribution_miRNA_MCCA=rowSums(cvContribution_miRNA_MCCA_Mat,na.rm=T)
+
+cvContribution_MCCA=list("CNV"=cvContribution_CNV_MCCA,"RNA"=cvContribution_RNA_MCCA,"miRNA"=cvContribution_miRNA_MCCA)
+
+
+```
+
+#AJIVE
+
+To conduct a Cross Validation analysis with AJIVE, we will utilize two of AJIVE's built in functions `get_block_scores()` and `get_block_loadings()`  which in this context will correspond to the contributions and contribution weights for the specified data type.  One requirement for AJIVE is the declaration of the desired ranks for each matrix.  This is done similarly to the PCCCA analysis, however we will try to be more careful when selecting these ranks and will thus choose 25, 50, and 50 for CNV, RNA, and miRNA respectively.  We will assume that these ranks will hold for all folds in this analysis.  We will only be examining the first vector of contributions, however this code can be easily modified to incorporate multiple if that is desired.  The code for calculating the contributions from the full analysis is below.  Please consult the AJIVE [paper](https://arxiv.org/abs/1704.02060) and [documentation](https://github.com/idc9/r_jive) for a more thorough explanation of their method.
+```{r,eval=F}
+library(ajive)
+
+fullJiveDec=ajive(moData,c(25,50,50))
+
+fullContribution_CNV_AJIVE=get_block_scores(fullJiveDec,1,"joint",normalized = F)[,1]
+fullContribution_RNA_AJIVE=get_block_scores(fullJiveDec,2,"joint",normalized = F)[,1]
+fullContribution_miRNA_AJIVE=get_block_scores(fullJiveDec,3,"joint",normalized = F)[,1]
+
+
+fullContribution_AJIVE=list("CNV"=fullContribution_CNV_AJIVE,"RNA"=fullContribution_RNA_AJIVE,"miRNA"=fullContribution_miRNA_AJIVE)
+```
+
+We now proceed with the calculation of the cross validated contributions.  The loadings will correspond to the weights which will allow us to calculate our contributions.  Again, this is not a quick method and thus it is advised to split the analysis for each fold into a separate job.    
+
+```{r,eval=F}
+x1=moData[[1]]
+x2=moData[[2]]
+x3=moData[[3]]
+
+
+cvContribution_CNV_AJIVE_Mat=matrix(rep(NA,kFold*nrow(x1)),ncol=kFold,nrow=nrow(x1))
+cvContribution_RNA_AJIVE_Mat=matrix(rep(NA,kFold*nrow(x2)),ncol=kFold,nrow=nrow(x2))
+cvContribution_miRNA_AJIVE_Mat=matrix(rep(NA,kFold*nrow(x3)),ncol=kFold,nrow=nrow(x3))
+
+for(i in 1:kFold){
+  id1=which(clustFold!=i)
+  train1=x1[id1,]
+  train2=x2[id1,]
+  train3=x3[id1,]
+  moTemp=list(train1,train2,train3)
+  
+  fullJiveDecTemp=ajive(moTemp,c(25,50,50))
+
+  
+  weights1=get_block_loadings(fullJiveDecTemp,1,"joint")[,1]
+  weights2=get_block_loadings(fullJiveDecTemp,2,"joint")[,1]
+  weights3=get_block_loadings(fullJiveDecTemp,3,"joint")[,1]
+  
+  fit1=x1[-id1,]%*%weight1
+  fit2=x2[-id1,]%*%weight2
+  fit3=x3[-id1,]%*%weight3
+ 
+  
+  
+  cvContribution_CNV_AJIVE_Mat[-id1,i]=fit1
+  cvContribution_RNA_AJIVE_Mat[-id1,i]=fit2
+  cvContribution_miRNA_AJIVE_Mat[-id1,i]=fit3
+  
+  
+}
+
+
+
+cvContribution_CNV_AJIVE=rowSums(cvContribution_CNV_AJIVE_Mat,na.rm=T)
+cvContribution_RNA_AJIVE=rowSums(cvContribution_RNA_AJIVE_Mat,na.rm=T)
+cvContribution_miRNA_AJIVE=rowSums(cvContribution_miRNA_AJIVE_Mat,na.rm=T)
+
+cvContribution_AJIVE=list("CNV"=cvContribution_CNV_AJIVE,"RNA"=cvContribution_RNA_AJIVE,"miRNA"=cvContribution_miRNA_AJIVE)
+
+
+```
+
+
+
+
+
+#MOFA
+[MOFA](https://www.biorxiv.org/content/early/2017/11/10/217554) is a Bayesian Factor Analysis method which can identify weights for each data type corresponding to each hidden factor.  To construct a contribution plot, one must select one single hidden factor of interest.  We acknowledge that only selecting one hidden factor may not correctly capture the entirety of what MOFA is capturing, however the purpose of the contribution plot is to identify whether a method is overfitting and whether the results are stable when a subset of the samples are removed from the analysis.  This analysis will aims to identify whether or not the first hidden factor is not overfit.  As with AJIVE, we would expect the correlations from the contribution plots to be lower because there are more hidden factors which may account for the remaining variation between data types.  Therefore, the correlations provided with a correlation plot are not able to be compared across methods, but rather the change in correlations from the full analysis to the cross validated analysis within a method are of interest.
+
+First, we obtain the full contribution for each data type as follows.  Note that for MOFA, samples are on the columns and features are on the rows.  Please consult the MOFA [github](https://github.com/bioFAM/MOFA) page for more details on how to run an analysis with MOFA.
+
+
+```{r,eval=F}
+library(MOFAtools)
+
+mofaFull=createMOFAobject(moData)
+dirOpt=list("dataDir"=tempdir(),"outFile"="mofaRes.hdf5")
+modelOpt=getDefaultModelOpts(mofaFull)
+modelOpt$likelihood=c("gaussian","gaussian","gaussian")
+trainOpt=getDefaultTrainOpts()
+
+
+mofaFull=prepareMOFA(mofaFull,DirOptions = dirOpt,ModelOptions = modelOpt,TrainOptions = trainOpt)
+mofaFull=runMOFA(mofaFull,dirOpt)
+
+weightCNV_MOFA=(getWeights(object = mofaFull,factors = 1,views = "view_1"))$view_1
+weightRNA_MOFA=(getWeights(object = mofaFull,factors = 1,views = "view_2"))$view_2
+weightmiRNA_MOFA=(getWeights(object = mofaFull,factors = 1,views = "view_3"))$view_3
+
+fullContribution_CNV_MOFA=x1%*%weightCNV_MOFA
+fullContribution_RNA_MOFA=x2%*%weightRNA_MOFA
+fullContribution_miRNA_MOFA=x3%*%weightmiRNA_MOFA
+
+
+fullContribution_MOFA=list("CNV"=fullContribution_CNV_MOFA,"RNA"=fullContribution_RNA_MOFA,"miRNA"=fullContribution_miRNA_MOFA)
+
+````
+
+
+Next we will obtain the cross validated contributions as follows.  As with previous methods, this is a very computational intensive step and it is not advised that you run the following code as is.  It is recommended that you divided each fold into a separate job and run simultaneously.
+
+```{r,eval=F}
+
+
+cvContribution_CNV_MOFA_Mat=matrix(rep(NA,kFold*nrow(x1)),ncol=kFold,nrow=nrow(x1))
+cvContribution_RNA_MOFA_Mat=matrix(rep(NA,kFold*nrow(x2)),ncol=kFold,nrow=nrow(x2))
+cvContribution_miRNA_MOFA_Mat=matrix(rep(NA,kFold*nrow(x3)),ncol=kFold,nrow=nrow(x3))
+
+for(i in 1:kFold){
+  id1=which(clustFold!=i)
+  train1=x1[id1,]
+  train2=x2[id1,]
+  train3=x3[id1,]
+  
+  moDataTemp=list(t(train1),t(train2),t(train3))
+  
+  mofaTemp=createMOFAobject(moDataTemp)
+  dirOpt=list("dataDir"=tempdir(),"outFile"=paste("mofaResTemp_",i,".hdf5",sep=""))
+  modelOpt=getDefaultModelOpts(mofaTemp)
+  modelOpt$likelihood=c("gaussian","gaussian","gaussian")
+  trainOpt=getDefaultTrainOpts()
+
+  
+  mofaTemp=prepareMOFA(mofaTemp,DirOptions = dirOpt,ModelOptions = modelOpt,TrainOptions = trainOpt)
+  mofaTemp=runMOFA(mofaTemp,dirOpt)
+  
+  weight1=(getWeights(object = mofaTemp,factors = 1,views = "view_1"))$view_1
+  weight2=(getWeights(object = mofaTemp,factors = 1,views = "view_2"))$view_2
+  weight3=(getWeights(object = mofaTemp,factors = 1,views = "view_3"))$view_3
+  
+  fit1=x1[-id1,]%*%weight1
+  fit2=x2[-id1,]%*%weight2
+  fit3=x3[-id1,]%*%weight3
+  
+  
+  
+  
+  cvContribution_CNV_MOFA_Mat[-id1,i]=fit1
+  cvContribution_RNA_MOFA_Mat[-id1,i]=fit2
+  cvContribution_miRNA_MOFA_Mat[-id1,i]=fit3
+  
+  
+}
+
+cvContribution_CNV_MOFA=rowSums(cvContribution_CNV_MOFA_Mat,na.rm=T)
+cvContribution_RNA_MOFA=rowSums(cvContribution_RNA_MOFA_Mat,na.rm=T)
+cvContribution_miRNA_MOFA=rowSums(cvContribution_miRNA_MOFA_Mat,na.rm=T)
+
+cvContribution_MOFA=list("CNV"=cvContribution_CNV_MOFA,"RNA"=cvContribution_RNA_MOFA,"miRNA"=cvContribution_miRNA_MOFA)
+
+
+```
+
+
+
+
+
+

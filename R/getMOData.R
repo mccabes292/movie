@@ -8,7 +8,7 @@
 #'@return Returns a list of data matrices in the order specified by \code{dataTypes} with common subjects having the specified \code{cancerType}
 #'
 #'
-getMOData=function(dataTypes,cancerType){
+getExampleMOData=function(dataTypes,cancerType){
   dataVec=c("Clinical","CNV","Gene","miRNA","Module","Mutation","OS","Protein")
   cancerVec=c("BLCA","BRCA","COAD","HNSC","KIRC","LUAD","LUSC")
   cancerVec2=c(3,4,5,6,7,8,9)
@@ -31,7 +31,7 @@ getMOData=function(dataTypes,cancerType){
   }
 
   
-  t1=sapply(1:nrow(data1),splitFunc)
+  
   
   filePath="C:/Sean/UNC/Mike Love/pccca/AlexData/TCGA_8cancer_rmmis_"
   fullData=NULL

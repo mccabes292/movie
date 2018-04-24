@@ -14,7 +14,9 @@ knitr::opts_chunk$set(echo = TRUE)
 #Data 
 
 This data is from Alex's paper.  Edit this to include whatever data will be used for the final paper.
-```{r,eval=F}
+```{r,message=F,echo=F}
+library(devtools)
+load_all()
 library(readr)
 library(DESeq2)
 library(magrittr)
@@ -22,33 +24,63 @@ library(dplyr)
 library(rafalib)
 library(ggplot2)
 library(cowplot)
+# 
+# 
+# rnaData=read_delim("C:/Sean/UNC/Mike Love/pccca/AlexData/rnaData.txt",delim="\t")
+# mirnaData=read_delim("C:/Sean/UNC/Mike Love/pccca/AlexData/mirnaData.txt",delim="\t")
+# clinData=read.table("C:/Sean/UNC/Mike Love/pccca/AlexData/clinData.txt",sep="\t",header=T)
+# 
+# #Subset to Breast Cancer Data
+# x1=rnaData[,-1]
+# x1=x1[,as.vector(t(clinData[2,-1]==1))]
+# x2=mirnaData[,-1]
+# x2=x2[,as.vector(t(clinData[2,-1]==1))]
 
 
-rnaData=read_delim("C:/Sean/UNC/Mike Love/pccca/AlexData/rnaData.txt",delim="\t")
-mirnaData=read_delim("C:/Sean/UNC/Mike Love/pccca/AlexData/mirnaData.txt",delim="\t")
-clinData=read.table("C:/Sean/UNC/Mike Love/pccca/AlexData/clinData.txt",sep="\t",header=T)
 
-#Subset to Breast Cancer Data
-x1=rnaData[,-1]
-x1=x1[,as.vector(t(clinData[2,-1]==1))]
-x2=mirnaData[,-1]
-x2=x2[,as.vector(t(clinData[2,-1]==1))]
 
+g1=getExampleMOData(c("CNV","Gene","miRNA","Clinical"),"BRCA")
+x1=g1[[2]]
+x2=g1[[3]]
+x3=g1[[1]]
+
+gender=as.vector(t((g1[[4]])[11,]))
+
+# 
+# 
+# x1Stand=apply(x1,MARGIN=1,scale)
+# x2Stand=apply(x2,MARGIN=1,scale)
+# x3Stand=apply(x3,MARGIN=1,scale)
+# rownames(x1Stand)=colnames(x1)
+# rownames(x2Stand)=colnames(x2)
+# rownames(x3Stand)=colnames(x3)
+# 
+# 
+# x1StandT=t(x1Stand)
+# x2StandT=t(x2Stand)
+# x3StandT=t(x3Stand)
+
+
+# write.table(x1StandT,"C:/Sean/UNC/Mike Love/pccca/AlexData/rnaStand.txt",sep="\t",row.names = F,col.names = F)
+# write.table(x2StandT,"C:/Sean/UNC/Mike Love/pccca/AlexData/mirnaStand.txt",sep="\t",row.names = F,col.names = F)
+# write.table(x3StandT,"C:/Sean/UNC/Mike Love/pccca/AlexData/cnvStand.txt",sep="\t",row.names = F,col.names = F)
 ```
+
+
 
 
 #CV Analysis (PC-CCA)
 
 
 First conduct a CV analysis with the Multi-Omics method of your choice.  We will demonstrate how this can be done by using a principal components based CCA, where a standard Canonical Correlation Analysis is conducted on the a thresholded number of principal components for each matrix.  
-```{r,eval=F}
+```{r,message=F,echo=F}
 library(CCA)
 library(caret)
 pc1=prcomp(t(x1))
 pc2=prcomp(t(x2))
 
-numC=50
-kFold=8
+numC=100
+kFold=5
 set.seed(50)
 trainIndex=groupKFold(pc1$x[,1],k=kFold)
 
@@ -58,7 +90,6 @@ fullScore1=t(t(cc1$xcoef[,1])%*%t(pc1$x[,1:numC]))
 fullScore2=t(t(cc1$ycoef[,1])%*%t(pc2$x[,1:numC]))
 pc1Mat=pc1$x[,1:numC]
 pc2Mat=pc2$x[,1:numC]
-
 
 score1=matrix(rep(NA,kFold*nrow(pc1Mat)),ncol=kFold,nrow=nrow(pc1Mat))
 score2=matrix(rep(NA,kFold*nrow(pc1Mat)),ncol=kFold,nrow=nrow(pc2Mat))
@@ -90,36 +121,578 @@ for(i in 1:kFold){
 fullWeights1=cc1$xcoef[,1]
 fullWeights2=cc1$ycoef[,1]
 
-scaledScore1=apply(score1,2,scale)
-scaledScore2=apply(score2,2,scale)
-rs1=rowSums(scaledScore1,na.rm=T)
-rs2=rowSums(scaledScore2,na.rm=T)
+rs1=rowSums(score1,na.rm=T)
+rs2=rowSums(score2,na.rm=T)
 
-idMem=(!is.na(score1)==1)%*%1:kFold
+foldMem=(!is.na(score1)==1)%*%1:kFold
 
 ```
 
-
-#Multi Omics Plots
-
-```{r,eval=F}
+#PCCCA Side By Side Plots
+The following code creates the side by side plots for PCCCA and CV analysis.
+```{r,echo=F}
 
 cvScores1=rowSums(score1,na.rm=T)
 cvScores2=rowSums(score2,na.rm=T)
 cvScores=list(cvScores1,cvScores2)
-cvScores[[3]]=cvScores[[1]]
-cvScores[[4]]=cvScores[[1]]
 
 fullScores=list(fullScore1,fullScore2)
-fullScores[[3]]=fullScores[[1]]
-fullScores[[4]]=fullScores[[1]]
 
+names(fullScores)=c("RNA","miRNA")
+names(cvScores)=c("RNA","miRNA")
+names(foldMem)="Fold"
 
-t1=makeSamplePlotObject(fullScores,cvScores,idMem)
-plot(t1,"SideBySide",xAxisPlot=1,yAxisPlot=2,colorVar=as.factor(idMem),grid=F)
-plotSamplePlotGrid(t1,1)
+t1=makeContributionPlotObject(fullScores,cvScores,foldMem)
+plot(t1,"SideBySide",xAxisPlot=1,yAxisPlot=2,colorVar=as.factor(gender),grid=F)
+
 ```
 
 
 
 
+
+
+
+
+
+
+
+#Plots from MCCA CV Analysis
+```{r,message=F,echo=F}
+foldMem=read.table("C:/Sean/UNC/Mike Love/pccca/AlexData/idMem_5Fold.txt")
+fullContribution_CNV_MCCA=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/5FoldRes/fullScore_CNV_MCCA.txt")
+fullContribution_RNA_MCCA=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/5FoldRes/fullScore_RNA_MCCA.txt")
+fullContribution_miRNA_MCCA=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/5FoldRes/fullScore_miRNA_MCCA.txt")
+
+
+cvContribution_CNV_MCCA=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/5FoldRes/cvScore_CNV_MCCA.txt")
+cvContribution_RNA_MCCA=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/5FoldRes/cvScore_RNA_MCCA.txt")
+cvContribution_miRNA_MCCA=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/5FoldRes/cvScore_miRNA_MCCA.txt")
+
+
+
+t1=makeContributionPlotObject(list("CNV"=fullContribution_CNV_MCCA[,1],"RNA"=fullContribution_RNA_MCCA[,1],"miRNA"=fullContribution_miRNA_MCCA[,1]),list("CNV"=cvContribution_CNV_MCCA[,1],"RNA"=cvContribution_RNA_MCCA[,1],"miRNA"=cvContribution_miRNA_MCCA[,1]),foldMem=as.vector(foldMem[,1]))
+
+plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(foldMem[,1]))
+plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
+plot(t1,"SideBySide",xAxisPlot = 2,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
+
+plot(t1,"Comparison",xAxisPlot = 3,yAxisPlot = 1,grid=T, colorVar=as.factor(foldMem[,1]))
+
+```
+
+
+
+#Plots from AJIVE CV Analysis
+```{r,message=F,echo=F}
+fullScore_CNV_AJIVE=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/5FoldRes/fullScore_CNV_AJIVE.txt")
+fullScore_RNA_AJIVE=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/5FoldRes/fullScore_RNA_AJIVE.txt")
+fullScore_miRNA_AJIVE=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/5FoldRes/fullScore_miRNA_AJIVE.txt")
+
+fullScoreAJIVE=list("CNV"=fullScore_CNV_AJIVE$V1,"RNA"=fullScore_RNA_AJIVE$V1,"miRNA"=fullScore_miRNA_AJIVE$V1)
+
+
+
+cvScore_CNV_AJIVE_Mat=matrix(rep(NA,kFold*nrow(fullScore_CNV_AJIVE)),ncol=kFold,nrow=nrow(fullScore_CNV_AJIVE))
+cvScore_RNA_AJIVE_Mat=matrix(rep(NA,kFold*nrow(fullScore_RNA_AJIVE)),ncol=kFold,nrow=nrow(fullScore_RNA_AJIVE))
+cvScore_miRNA_AJIVE_Mat=matrix(rep(NA,kFold*nrow(fullScore_miRNA_AJIVE)),ncol=kFold,nrow=nrow(fullScore_miRNA_AJIVE))
+
+for(i in 1:5){
+  temp1=read.table(paste("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/5FoldRes/cvScore_CNV_AJIVE",i,".txt",sep=""))
+temp2=read.table(paste("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/5FoldRes/cvScore_RNA_AJIVE",i,".txt",sep=""))
+temp3=read.table(paste("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/5FoldRes/cvScore_miRNA_AJIVE",i,".txt",sep=""))
+
+cvScore_CNV_AJIVE_Mat[,i]=(temp1$V1)
+cvScore_RNA_AJIVE_Mat[,i]=temp2$V1
+cvScore_miRNA_AJIVE_Mat[,i]=temp3$V1
+}
+
+cvScore_CNV_AJIVE=rowSums(cvScore_CNV_AJIVE_Mat,na.rm=T)
+cvScore_RNA_AJIVE=rowSums(cvScore_RNA_AJIVE_Mat,na.rm=T)
+cvScore_miRNA_AJIVE=rowSums(cvScore_miRNA_AJIVE_Mat,na.rm=T)
+
+
+
+
+
+cvScoreAjive=list("CNV"=cvScore_CNV_AJIVE,"RNA"=cvScore_RNA_AJIVE,"miRNA"=cvScore_miRNA_AJIVE)
+
+
+
+t1=makeContributionPlotObject(fullScoreAJIVE,cvScoreAjive,foldMem=as.vector(foldMem[,1]))
+
+
+plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(gender))
+plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
+plot(t1,"SideBySide",xAxisPlot = 2,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
+
+
+plot(t1,"Comparison",xAxisPlot = 1,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
+plot(t1,"Comparison",xAxisPlot = 2,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
+plot(t1,"Comparison",xAxisPlot = 3,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
+
+```
+
+
+
+
+#MOFA Analysis
+```{r,message=F,echo=F}
+fullScore_CNV_MOFA=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/5FoldRes/fullScore_CNV_MOFA.txt")
+fullScore_RNA_MOFA=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/5FoldRes/fullScore_RNA_MOFA.txt")
+fullScore_miRNA_MOFA=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/5FoldRes/fullScore_miRNA_MOFA.txt")
+
+fullScoreMOFA=list("CNV"=fullScore_CNV_MOFA$V1,"RNA"=fullScore_RNA_MOFA$V1,"miRNA"=fullScore_miRNA_MOFA$V1)
+
+
+
+cvScore_CNV_MOFA_Mat=matrix(rep(NA,kFold*nrow(fullScore_CNV_MOFA)),ncol=kFold,nrow=nrow(fullScore_CNV_MOFA))
+cvScore_RNA_MOFA_Mat=matrix(rep(NA,kFold*nrow(fullScore_RNA_MOFA)),ncol=kFold,nrow=nrow(fullScore_RNA_MOFA))
+cvScore_miRNA_MOFA_Mat=matrix(rep(NA,kFold*nrow(fullScore_miRNA_MOFA)),ncol=kFold,nrow=nrow(fullScore_miRNA_MOFA))
+
+for(i in 1:5){
+  temp1=read.table(paste("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/5FoldRes/cvScore_CNV_MOFA_",i,".txt",sep=""))
+temp2=read.table(paste("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/5FoldRes/cvScore_RNA_MOFA_",i,".txt",sep=""))
+temp3=read.table(paste("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/5FoldRes/cvScore_miRNA_MOFA_",i,".txt",sep=""))
+
+cvScore_CNV_MOFA_Mat[,i]=(temp1$V1)
+cvScore_RNA_MOFA_Mat[,i]=temp2$V1
+cvScore_miRNA_MOFA_Mat[,i]=temp3$V1
+}
+
+cvScore_CNV_MOFA=rowSums(cvScore_CNV_MOFA_Mat,na.rm=T)
+cvScore_RNA_MOFA=rowSums(cvScore_RNA_MOFA_Mat,na.rm=T)
+cvScore_miRNA_MOFA=rowSums(cvScore_miRNA_MOFA_Mat,na.rm=T)
+
+
+
+
+
+cvScoreMOFA=list("CNV"=cvScore_CNV_MOFA,"RNA"=cvScore_RNA_MOFA,"miRNA"=cvScore_miRNA_MOFA)
+
+
+
+t1=makeContributionPlotObject(fullScoreMOFA,cvScoreMOFA,foldMem=as.vector(foldMem[,1]))
+
+plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(gender))
+plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
+plot(t1,"SideBySide",xAxisPlot = 2,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
+
+
+plot(t1,"Comparison",xAxisPlot = 1,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
+plot(t1,"Comparison",xAxisPlot = 2,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
+plot(t1,"Comparison",xAxisPlot = 3,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
+
+
+
+```
+
+
+
+
+
+
+####PERMUTATION Analysis
+
+#Permuting Samples
+We also created null data by permuting the samples in order to evaluate the ability of the methods to overfit in null data.
+
+
+
+```{r,echo=F}
+set.seed(1992)
+rnaPerm=x1[,sample(1:ncol(x1))]
+miRNAPerm=x2[,sample(1:ncol(x2))]
+cnvPerm=x3[,sample(1:ncol(x3))]
+#write.table(rnaPerm,"C:/Sean/UNC/Mike Love/pccca/Packages/Methods/MCCA_Perm/rnaPerm.txt",quote=F,row.names = F,col.names = F)
+#write.table(miRNAPerm,"C:/Sean/UNC/Mike Love/pccca/Packages/Methods/MCCA_Perm/miRNAPerm.txt",quote=F,row.names = F,col.names = F)
+#write.table(cnvPerm,"C:/Sean/UNC/Mike Love/pccca/Packages/Methods/MCCA_Perm/cnvPerm.txt",quote=F,row.names = F,col.names = F)
+
+
+rnaPermStand=apply(x1,1,scale)
+miRNAPermStand=apply(x2,1,scale)
+
+cnvPermStand=apply(x3,1,scale)
+
+
+#write.table(t(rnaPermStand),"C:/Sean/UNC/Mike Love/pccca/Packages/Methods/MCCA_Perm/rnaPermStand.txt",quote=F,row.names = F,col.names = F)
+#write.table(t(miRNAPermStand),"C:/Sean/UNC/Mike Love/pccca/Packages/Methods/MCCA_Perm/miRNAPermStand.txt",quote=F,row.names = F,col.names = F)
+#write.table(t(cnvPermStand),"C:/Sean/UNC/Mike Love/pccca/Packages/Methods/MCCA_Perm/cnvPermStand.txt",quote=F,row.names = F,col.names = F)
+
+```
+
+
+#Permute Order PCCCA
+```{r,message=F,echo=F}
+pc1Perm=prcomp(t(rnaPerm))
+pc2Perm=prcomp(t(miRNAPerm))
+pc3Perm=prcomp(t(cnvPerm))
+
+cc1Perm=cc(pc1Perm$x[,1:numC],pc2Perm$x[,1:numC])
+
+fullScore1Perm=t(t(cc1Perm$xcoef[,1])%*%t(pc1Perm$x[,1:numC]))
+fullScore2Perm=t(t(cc1Perm$ycoef[,1])%*%t(pc2Perm$x[,1:numC]))
+pc1MatPerm=pc1Perm$x[,1:numC]
+pc2MatPerm=pc2Perm$x[,1:numC]
+
+
+score1Perm=matrix(rep(NA,kFold*nrow(pc1MatPerm)),ncol=kFold,nrow=nrow(pc1MatPerm))
+score2Perm=matrix(rep(NA,kFold*nrow(pc1MatPerm)),ncol=kFold,nrow=nrow(pc2MatPerm))
+weights1Perm=matrix(rep(NA,numC*kFold ),ncol=kFold,nrow=numC )
+weights2Perm=matrix(rep(NA,numC*kFold ),ncol=kFold,nrow=numC)
+cors=rep(NA,kFold)
+binSize=ncol(x1)/kFold
+for(i in 1:kFold){
+  score1Temp=rep(NA,nrow(pc1Mat))
+  score2Temp=rep(NA,nrow(pc2Mat))
+  id1=trainIndex[[i]]
+  train1=pc1MatPerm[id1,]
+  train2=pc2MatPerm[id1,]
+  ccT=cc(train1,train2)
+  cors[i]=ccT$cor[1]
+  score1Temp[id1]=t(t(ccT$xcoef[,1])%*%t(train1))
+  score2Temp[id1]=t(t(ccT$ycoef[,1])%*%t(train2))
+
+  weights1[,i]=ccT$xcoef[,1]
+  weights2[,i]=ccT$ycoef[,1]
+  
+  fit1=t(weights1[,i])%*%t(pc1Mat[-id1,])
+  fit2=t(weights2[,i])%*%t(pc2Mat[-id1,])
+  score1Perm[-id1,i]=fit1
+  score2Perm[-id1,i]=fit2
+  
+}
+
+
+rs1Perm=rowSums(score1Perm,na.rm=T)
+rs2Perm=rowSums(score2Perm,na.rm=T)
+
+permCV=list("rna"=rs1Perm,"mirna"=rs2Perm)
+
+fullScoresPerm=list("rna"=fullScore1Perm,"mirna"=fullScore2Perm)
+
+
+t1=makeContributionPlotObject(fullScoresPerm,permCV,foldMem)
+plot(t1,"SideBySide",xAxisPlot=1,yAxisPlot=2,colorVar=as.factor(foldMem),grid=F)
+plot(t1,"Comparison",xAxisPlot=2,yAxisPlot=2,colorVar=as.factor(foldMem),grid=T)
+
+```
+
+
+
+
+
+#Permute Sample Order MCCA
+```{r,message=F,echo=F}
+
+fullScore_RNA_MCCA_Perm=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/MCCA_Perm/Results/fullScore_RNA_MCCA_Perm.txt")
+fullScore_miRNA_MCCA_Perm=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/MCCA_Perm/Results/fullScore_miRNA_MCCA_Perm.txt")
+
+
+cvScore_RNA_MCCA_Perm_Mat=matrix(rep(NA,kFold*nrow(fullScore_RNA_MCCA_Perm)),ncol=kFold,nrow=nrow(fullScore_RNA_MCCA_Perm))
+cvScore_miRNA_MCCA_Perm_Mat=matrix(rep(NA,kFold*nrow(fullScore_miRNA_MCCA_Perm)),ncol=kFold,nrow=nrow(fullScore_miRNA_MCCA_Perm))
+
+for(i in 1:5){
+temp2=read.table(paste("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/MCCA_Perm/Results/cvScore_RNA_MCCA_Fold",i,"_Perm.txt",sep=""))
+temp3=read.table(paste("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/MCCA_Perm/Results/cvScore_miRNA_MCCA_Fold",i,"_Perm.txt",sep=""))
+
+cvScore_RNA_MCCA_Perm_Mat[,i]=temp2$V1
+cvScore_miRNA_MCCA_Perm_Mat[,i]=temp3$V1
+}
+
+cvScore_RNA_MCCA_Perm=rowSums(cvScore_RNA_MCCA_Perm_Mat,na.rm=T)
+cvScore_miRNA_MCCA_Perm=rowSums(cvScore_miRNA_MCCA_Perm_Mat,na.rm=T)
+
+cvScoresMCCAPerm=list("RNA"=cvScore_RNA_MCCA_Perm,"miRNA"=cvScore_miRNA_MCCA_Perm)
+fullScoresMCCAPerm=list("RNA"=fullScore_RNA_MCCA_Perm$V1,"miRNA"=fullScore_miRNA_MCCA_Perm$V1)
+
+
+t1=makeContributionPlotObject(fullScoresMCCAPerm,cvScoresMCCAPerm,foldMem=as.vector(foldMem[,1]))
+
+#plot(t1,"CV",xAxisPlot = 1,yAxisPlot = 2,grid=T, colorVar=as.factor(foldMem[,1]))
+plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(foldMem[,1]))
+
+plot(t1,"Comparison",xAxisPlot = 3,yAxisPlot = 1,grid=T, colorVar=as.factor(foldMem[,1]))
+```
+
+
+
+#Plots from AJIVE Permuted Analysis
+```{r,message=F,echo=F}
+
+fullScore_RNA_AJIVE_Perm=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/MCCA_Perm/Results/fullScore_RNA_AJIVE_Perm.txt")
+fullScore_miRNA_AJIVE_Perm=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/MCCA_Perm/Results/fullScore_miRNA_AJIVE_Perm.txt")
+
+fullScoreAJIVEPerm=list("RNA"=fullScore_RNA_AJIVE_Perm$V1,"miRNA"=fullScore_miRNA_AJIVE_Perm$V1)
+
+
+
+cvScore_RNA_AJIVE_Mat_Perm=matrix(rep(NA,kFold*nrow(fullScore_RNA_AJIVE_Perm)),ncol=kFold,nrow=nrow(fullScore_RNA_AJIVE_Perm))
+cvScore_miRNA_AJIVE_Mat_Perm=matrix(rep(NA,kFold*nrow(fullScore_miRNA_AJIVE_Perm)),ncol=kFold,nrow=nrow(fullScore_miRNA_AJIVE_Perm))
+
+for(i in 1:5){
+
+temp2=read.table(paste("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/MCCA_Perm/Results/cvScore_RNA_AJIVE",i,"_Perm.txt",sep=""))
+temp3=read.table(paste("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/MCCA_Perm/Results/cvScore_miRNA_AJIVE",i,"_Perm.txt",sep=""))
+
+cvScore_RNA_AJIVE_Mat_Perm[,i]=temp2$V1
+cvScore_miRNA_AJIVE_Mat_Perm[,i]=temp3$V1
+}
+
+cvScore_RNA_AJIVE_Perm=rowSums(cvScore_RNA_AJIVE_Mat_Perm,na.rm=T)
+cvScore_miRNA_AJIVE_Perm=rowSums(cvScore_miRNA_AJIVE_Mat_Perm,na.rm=T)
+
+
+cvScoreAjivePerm=list("RNA"=cvScore_RNA_AJIVE_Perm,"miRNA"=cvScore_miRNA_AJIVE_Perm)
+
+
+
+t1=makeContributionPlotObject(fullScoreAJIVEPerm,cvScoreAjivePerm,foldMem=as.vector(foldMem[,1]))
+
+
+plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(foldMem[,1]))
+
+
+plot(t1,"Comparison",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(foldMem[,1]))
+plot(t1,"Comparison",xAxisPlot = 2,yAxisPlot = 2,grid=F, colorVar=as.factor(foldMem[,1]))
+
+```
+
+
+
+#MOFA Permutation Analysis
+```{r,message=F,echo=F}
+
+
+fullScore_RNA_MOFA_Perm=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/MCCA_Perm/Results/fullScore_RNA_MOFA_Perm.txt")
+fullScore_miRNA_MOFA_Perm=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/MCCA_Perm/Results/fullScore_miRNA_MOFA_Perm.txt")
+
+fullScoreMOFAPerm=list("RNA"=fullScore_RNA_MOFA_Perm$V1,"miRNA"=fullScore_miRNA_MOFA_Perm$V1)
+
+
+
+
+cvScore_RNA_MOFA_Mat_Perm=matrix(rep(NA,kFold*nrow(fullScore_RNA_MOFA_Perm)),ncol=kFold,nrow=nrow(fullScore_RNA_MOFA_Perm))
+cvScore_miRNA_MOFA_Mat_Perm=matrix(rep(NA,kFold*nrow(fullScore_miRNA_MOFA_Perm)),ncol=kFold,nrow=nrow(fullScore_miRNA_MOFA_Perm))
+
+for(i in 1:5){
+
+temp2=read.table(paste("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/MCCA_Perm/Results/cvScore_RNA_MOFA_Perm_",i,".txt",sep=""))
+temp3=read.table(paste("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/MCCA_Perm/Results/cvScore_miRNA_MOFA_Perm_",i,".txt",sep=""))
+
+cvScore_RNA_MOFA_Mat_Perm[,i]=temp2$V1
+cvScore_miRNA_MOFA_Mat_Perm[,i]=temp3$V1
+}
+
+cvScore_RNA_MOFA_Perm=rowSums(cvScore_RNA_MOFA_Mat_Perm,na.rm=T)
+cvScore_miRNA_MOFA_Perm=rowSums(cvScore_miRNA_MOFA_Mat_Perm,na.rm=T)
+
+cvScoreMOFAPerm=list("RNA"=cvScore_RNA_MOFA_Perm,"miRNA"=cvScore_miRNA_MOFA_Perm)
+
+t1=makeContributionPlotObject(fullScoreMOFAPerm,cvScoreMOFAPerm,as.vector(foldMem[,1]))
+
+plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(foldMem[,1]))
+
+
+plot(t1,"Comparison",xAxisPlot = 1,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
+plot(t1,"Comparison",xAxisPlot = 2,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
+
+
+```
+
+
+###iCluster+ Data
+iCluster+ data is TCGA Glioblastoma data on 84 samples contraining CNV, RNA Seq, and Mutation data.  
+```{r,eval=F,echo=F}
+library(iClusterPlus)
+library(gplots)
+library(GenomicRanges)
+library(lattice)
+library(readr)
+library(DESeq2)
+library(caret)
+library(magrittr)
+
+data(gbm)
+dim(gbm.mut)
+
+
+mut.rate=apply(gbm.mut,2,mean)
+gbm.mut2 = gbm.mut[,which(mut.rate>0.02)]
+gbm.mut2[1:10,1:8]
+
+data(variation.hg18.v10.nov.2010)
+gbm.cn=CNregions(seg=gbm.seg,epsilon=0,adaptive=FALSE,rmCNV=TRUE, cnv=variation.hg18.v10.nov.2010[,3:5], frac.overlap=0.5, rmSmallseg=TRUE,nProbes=5)
+
+
+gbm.cn=gbm.cn[order(rownames(gbm.cn)),]
+all(rownames(gbm.cn)==rownames(gbm.exp))
+all(rownames(gbm.cn)==rownames(gbm.mut2))
+
+dim(gbm.cn)
+dim(gbm.exp)
+dim(gbm.mut2)
+
+cnStand=apply(gbm.cn,MARGIN=2,scale)
+rnaStand=apply(gbm.exp,MARGIN=2,scale)
+mutStand=apply(gbm.mut2,MARGIN=2,scale)
+
+
+#write.table(t(cnStand),"C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/cnvICluster_Stand.txt",quote=F,row.names = F,col.names = F)
+#write.table(t(mutStand),"C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/mutationICluster_Stand.txt",quote=F,row.names = F,col.names = F)
+#write.table(t(rnaStand),"C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/expICluster_Stand.txt",quote=F,row.names = F,col.names = F)
+
+
+
+#write.table(t(gbm.cn),"C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/cnvICluster.txt",quote=F,row.names = F,col.names = F)
+#write.table(t(gbm.mut2),"C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/mutationICluster.txt",quote=F,row.names = F,col.names = F)
+#write.table(t(gbm.exp),"C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/expICluster.txt",quote=F,row.names = F,col.names = F)
+
+
+pcClust=prcomp(gbm.exp)
+
+trainIndex=groupKFold(pcClust$x[,1],k=4)
+
+
+idIndex=ifelse(!(1:nrow(gbm.exp))%in%trainIndex[[1]],1,ifelse(!(1:nrow(gbm.exp))%in%trainIndex[[2]],2,ifelse(!(1:nrow(gbm.exp))%in%trainIndex[[3]],3,ifelse(!(1:nrow(gbm.exp))%in%trainIndex[[4]],4,NA ) )  )   )      
+
+#write.table(idIndex,"C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/idMemICluster.txt",quote=F,col.names = F,row.names = F)
+
+
+```
+
+
+
+
+
+#Plots from MCCA CV Analysis with iCluster+ Data
+```{r,message=F,echo=F}
+clustFold=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/idMemICluster.txt")
+
+fullScore_CNV_MCCA_Clust=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/Results/fullScore_CNV_MCCA_ICluster.txt")
+fullScore_RNA_MCCA_Clust=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/Results/fullScore_RNA_MCCA_ICluster.txt")
+fullScore_Mut_MCCA_Clust=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/Results/fullScore_Mut_MCCA_ICluster.txt")
+
+
+cvScore_CNV_MCCA_Clust=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/Results/cvScore_CNV_MCCA_ICluster.txt")
+cvScore_RNA_MCCA_Clust=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/Results/cvScore_RNA_MCCA_ICluster.txt")
+cvScore_Mut_MCCA_Clust=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/Results/cvScore_Mut_MCCA_ICluster.txt")
+
+
+
+t1=makeContributionPlotObject(list("CNV"=fullScore_CNV_MCCA_Clust[,1],"RNA"=fullScore_RNA_MCCA_Clust[,1],"Mut"=fullScore_Mut_MCCA_Clust[,1]),list("CNV"=cvScore_CNV_MCCA_Clust[,1],"RNA"=cvScore_RNA_MCCA_Clust[,1],"Mut"=cvScore_Mut_MCCA_Clust[,1]),foldMem=as.vector(clustFold[,1]))
+
+plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(clustFold[,1]))
+plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 3,grid=F, colorVar=as.factor(clustFold[,1]))
+plot(t1,"SideBySide",xAxisPlot = 2,yAxisPlot = 3,grid=F, colorVar=as.factor(clustFold[,1]))
+
+plot(t1,"Comparison",xAxisPlot = 3,yAxisPlot = 1,grid=T, colorVar=as.factor(clustFold[,1]))
+
+```
+
+
+
+#Plots from AJIVE CV Analysis iCluster+ Data
+```{r,message=F,echo=F}
+
+fullScore_CNV_AJIVE_Clust=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/Results/fullScore_CNV_AJIVE_ICluster.txt")
+fullScore_RNA_AJIVE_Clust=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/Results/fullScore_RNA_AJIVE_ICluster.txt")
+fullScore_Mut_AJIVE_Clust=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/Results/fullScore_Mut_AJIVE_ICluster.txt")
+
+fullScoreAJIVE_Clust=list("CNV"=fullScore_CNV_AJIVE_Clust$V1,"RNA"=fullScore_RNA_AJIVE_Clust$V1,"Mut"=fullScore_Mut_AJIVE_Clust$V1)
+
+
+
+cvScore_CNV_AJIVE_Mat_Clust=matrix(rep(NA,kFold*nrow(fullScore_CNV_AJIVE_Clust)),ncol=kFold,nrow=nrow(fullScore_CNV_AJIVE_Clust))
+cvScore_RNA_AJIVE_Mat_Clust=matrix(rep(NA,kFold*nrow(fullScore_RNA_AJIVE_Clust)),ncol=kFold,nrow=nrow(fullScore_RNA_AJIVE_Clust))
+cvScore_Mut_AJIVE_Mat_Clust=matrix(rep(NA,kFold*nrow(fullScore_Mut_AJIVE_Clust)),ncol=kFold,nrow=nrow(fullScore_Mut_AJIVE_Clust))
+
+for(i in 1:4){
+  temp1=read.table(paste("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/Results/cvScore_CNV_AJIVE",i,"_ICluster.txt",sep=""))
+temp2=read.table(paste("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/Results/cvScore_RNA_AJIVE",i,"_ICluster.txt",sep=""))
+temp3=read.table(paste("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/Results/cvScore_Mut_AJIVE",i,"_ICluster.txt",sep=""))
+
+cvScore_CNV_AJIVE_Mat_Clust[,i]=(temp1$V1)
+cvScore_RNA_AJIVE_Mat_Clust[,i]=temp2$V1
+cvScore_Mut_AJIVE_Mat_Clust[,i]=temp3$V1
+}
+
+cvScore_CNV_AJIVE_Clust=rowSums(cvScore_CNV_AJIVE_Mat_Clust,na.rm=T)
+cvScore_RNA_AJIVE_Clust=rowSums(cvScore_RNA_AJIVE_Mat_Clust,na.rm=T)
+cvScore_Mut_AJIVE_Clust=rowSums(cvScore_Mut_AJIVE_Mat_Clust,na.rm=T)
+
+
+
+
+
+cvScoreAjive_Clust=list("CNV"=cvScore_CNV_AJIVE_Clust,"RNA"=cvScore_RNA_AJIVE_Clust,"Mut"=cvScore_Mut_AJIVE_Clust)
+
+
+
+t1=makeContributionPlotObject(fullScoreAJIVE_Clust,cvScoreAjive_Clust,foldMem=as.vector(clustFold[,1]))
+
+
+plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(clustFold[,1]))
+plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 3,grid=F, colorVar=as.factor(clustFold[,1]))
+plot(t1,"SideBySide",xAxisPlot = 2,yAxisPlot = 3,grid=F, colorVar=as.factor(clustFold[,1]))
+
+
+plot(t1,"Comparison",xAxisPlot = 1,yAxisPlot = 3,grid=F, colorVar=as.factor(clustFold[,1]))
+plot(t1,"Comparison",xAxisPlot = 2,yAxisPlot = 3,grid=F, colorVar=as.factor(clustFold[,1]))
+plot(t1,"Comparison",xAxisPlot = 3,yAxisPlot = 3,grid=F, colorVar=as.factor(clustFold[,1]))
+
+```
+
+
+
+
+#MOFA Analysis
+```{r,message=F,echo=F}
+
+fullScore_CNV_MOFA_Clust=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/Results/fullScore_CNV_MOFA_ICluster.txt")
+fullScore_RNA_MOFA_Clust=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/Results/fullScore_RNA_MOFA_ICluster.txt")
+fullScore_Mut_MOFA_Clust=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/Results/fullScore_Mut_MOFA_ICluster.txt")
+
+fullScoreMOFA_Clust=list("CNV"=fullScore_CNV_MOFA_Clust$V1,"RNA"=fullScore_RNA_MOFA_Clust$V1,"Mut"=fullScore_Mut_MOFA_Clust$V1)
+
+
+
+cvScore_CNV_MOFA_Mat_Clust=matrix(rep(NA,kFold*nrow(fullScore_CNV_MOFA_Clust)),ncol=kFold,nrow=nrow(fullScore_CNV_MOFA_Clust))
+cvScore_RNA_MOFA_Mat_Clust=matrix(rep(NA,kFold*nrow(fullScore_RNA_MOFA_Clust)),ncol=kFold,nrow=nrow(fullScore_RNA_MOFA_Clust))
+cvScore_Mut_MOFA_Mat_Clust=matrix(rep(NA,kFold*nrow(fullScore_Mut_MOFA_Clust)),ncol=kFold,nrow=nrow(fullScore_Mut_MOFA_Clust))
+
+for(i in 1:4){
+  temp1=read.table(paste("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/Results/cvScore_CNV_MOFA_",i,"_ICluster.txt",sep=""))
+temp2=read.table(paste("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/Results/cvScore_RNA_MOFA_",i,"_ICluster.txt",sep=""))
+temp3=read.table(paste("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/iClusterData/Results/cvScore_Mut_MOFA_",i,"_ICluster.txt",sep=""))
+
+cvScore_CNV_MOFA_Mat_Clust[,i]=(temp1$V1)
+cvScore_RNA_MOFA_Mat_Clust[,i]=temp2$V1
+cvScore_Mut_MOFA_Mat_Clust[,i]=temp3$V1
+}
+
+cvScore_CNV_MOFA_Clust=rowSums(cvScore_CNV_MOFA_Mat_Clust,na.rm=T)
+cvScore_RNA_MOFA_Clust=rowSums(cvScore_RNA_MOFA_Mat_Clust,na.rm=T)
+cvScore_Mut_MOFA_Clust=rowSums(cvScore_Mut_MOFA_Mat_Clust,na.rm=T)
+
+
+
+
+
+cvScoreMOFA_Clust=list("CNV"=cvScore_CNV_MOFA_Clust,"RNA"=cvScore_RNA_MOFA_Clust,"Mut"=cvScore_Mut_MOFA_Clust)
+
+
+
+t1=makeContributionPlotObject(fullScoreMOFA_Clust,cvScoreMOFA_Clust,foldMem=as.vector(clustFold[,1]))
+
+
+plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(clustFold[,1]))
+plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 3,grid=F, colorVar=as.factor(clustFold[,1]))
+plot(t1,"SideBySide",xAxisPlot = 2,yAxisPlot = 3,grid=F, colorVar=as.factor(clustFold[,1]))
+
+
+plot(t1,"Comparison",xAxisPlot = 1,yAxisPlot = 3,grid=F, colorVar=as.factor(clustFold[,1]))
+plot(t1,"Comparison",xAxisPlot = 2,yAxisPlot = 3,grid=F, colorVar=as.factor(clustFold[,1]))
+plot(t1,"Comparison",xAxisPlot = 3,yAxisPlot = 3,grid=F, colorVar=as.factor(clustFold[,1]))
+
+```
