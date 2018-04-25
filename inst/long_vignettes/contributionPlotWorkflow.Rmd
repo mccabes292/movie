@@ -143,7 +143,7 @@ names(cvScores)=c("RNA","miRNA")
 names(foldMem)="Fold"
 
 t1=makeContributionPlotObject(fullScores,cvScores,foldMem)
-plot(t1,"SideBySide",xAxisPlot=1,yAxisPlot=2,colorVar=as.factor(gender),grid=F)
+plot(t1,"SideBySide",xAxisPlot=1,yAxisPlot=2,colorVar=as.factor(foldMem),grid=F)
 
 ```
 
@@ -222,7 +222,7 @@ cvScoreAjive=list("CNV"=cvScore_CNV_AJIVE,"RNA"=cvScore_RNA_AJIVE,"miRNA"=cvScor
 t1=makeContributionPlotObject(fullScoreAJIVE,cvScoreAjive,foldMem=as.vector(foldMem[,1]))
 
 
-plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(gender))
+plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(foldMem[,1]))
 plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
 plot(t1,"SideBySide",xAxisPlot = 2,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
 
@@ -274,7 +274,7 @@ cvScoreMOFA=list("CNV"=cvScore_CNV_MOFA,"RNA"=cvScore_RNA_MOFA,"miRNA"=cvScore_m
 
 t1=makeContributionPlotObject(fullScoreMOFA,cvScoreMOFA,foldMem=as.vector(foldMem[,1]))
 
-plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(gender))
+plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(foldMem[,1]))
 plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
 plot(t1,"SideBySide",xAxisPlot = 2,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
 
@@ -343,8 +343,8 @@ weights2Perm=matrix(rep(NA,numC*kFold ),ncol=kFold,nrow=numC)
 cors=rep(NA,kFold)
 binSize=ncol(x1)/kFold
 for(i in 1:kFold){
-  score1Temp=rep(NA,nrow(pc1Mat))
-  score2Temp=rep(NA,nrow(pc2Mat))
+  score1Temp=rep(NA,nrow(pc1MatPerm))
+  score2Temp=rep(NA,nrow(pc2MatPerm))
   id1=trainIndex[[i]]
   train1=pc1MatPerm[id1,]
   train2=pc2MatPerm[id1,]
@@ -353,11 +353,11 @@ for(i in 1:kFold){
   score1Temp[id1]=t(t(ccT$xcoef[,1])%*%t(train1))
   score2Temp[id1]=t(t(ccT$ycoef[,1])%*%t(train2))
 
-  weights1[,i]=ccT$xcoef[,1]
-  weights2[,i]=ccT$ycoef[,1]
+  weights1Perm[,i]=ccT$xcoef[,1]
+  weights2Perm[,i]=ccT$ycoef[,1]
   
-  fit1=t(weights1[,i])%*%t(pc1Mat[-id1,])
-  fit2=t(weights2[,i])%*%t(pc2Mat[-id1,])
+  fit1=t(weights1Perm[,i])%*%t(pc1MatPerm[-id1,])
+  fit2=t(weights2Perm[,i])%*%t(pc2MatPerm[-id1,])
   score1Perm[-id1,i]=fit1
   score2Perm[-id1,i]=fit2
   
@@ -373,8 +373,8 @@ fullScoresPerm=list("rna"=fullScore1Perm,"mirna"=fullScore2Perm)
 
 
 t1=makeContributionPlotObject(fullScoresPerm,permCV,foldMem)
-plot(t1,"SideBySide",xAxisPlot=1,yAxisPlot=2,colorVar=as.factor(foldMem),grid=F)
-plot(t1,"Comparison",xAxisPlot=2,yAxisPlot=2,colorVar=as.factor(foldMem),grid=T)
+plot(t1,"SideBySide",xAxisPlot=1,yAxisPlot=2,colorVar=as.factor(foldMem[,1]),grid=F)
+plot(t1,"Comparison",xAxisPlot=2,yAxisPlot=2,colorVar=as.factor(foldMem[,1]),grid=T)
 
 ```
 

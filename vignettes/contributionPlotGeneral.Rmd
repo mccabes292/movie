@@ -1,0 +1,75 @@
+---
+title: "Contribution Plots"
+date: "`r format(Sys.Date(), '%m/%d/%Y')`"
+author: "Sean D. McCabe, Danyu Lin, and Michael I. Love"
+output:
+  rmarkdown::html_document:
+    highlight: pygments
+    toc: true
+    toc_float: true
+abstract: |
+  *apeglm* provides empirical Bayes shrinkage estimators for effect sizes for a
+  variety of GLM models; *apeglm* stands for "Approximate Posterior
+  Estimation for GLM".
+  apeglm package version: `r packageVersion("apeglm")`
+bibliography: library.bib
+vignette: |
+  %\VignetteIndexEntry{Creating Contribution Plots}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+The first step of constructing a Contribution Plot is to conduct a CV analysis of whatever method is desired.  Please consult our Cross Validation Analysis Vignette for example code on how to conduct this type of analysis for PCCCA, Sparse mCCA, AJIVE, and MOFA.  Once this analysis is complete, you need to create a `contributionPlotObject` utilizing the `makeContributionPlotObject()` function.  This will scale the contributions within each fold to ensure that the contributions are consistent.  
+
+
+#Preparing The Results
+First the full and cross validated contributions must be in labeled lists.  The elements of both lists must be labeled or else an error will be returned.  
+
+
+
+```{r,message=F}
+library(ggplot2)
+library(devtools)
+library(magrittr)
+library(cowplot)
+load_all()
+
+load("C:/Sean/UNC/Mike Love/pccca/Packages/mccares.RData")
+fullContribution_MCCA=list("CNV"=fullContribution_CNV_MCCA,"RNA"=fullContribution_RNA_MCCA,"miRNA"=fullContribution_miRNA_MCCA)
+cvContribution_MCCA=list("CNV"=cvContribution_CNV_MCCA,"RNA"=cvContribution_RNA_MCCA,"miRNA"=cvContribution_miRNA_MCCA)
+```
+
+
+
+#Creating a Contribution plot object
+
+```{r}
+contributionOb=makeContributionPlotObject(fullContributions =fullContribution_MCCA,cvContributions = cvContribution_MCCA,foldMem = foldMem)
+```
+
+
+#Making a Contribution Plot
+##Side By Side Plots
+```{r}
+plot(contributionObject=contributionOb,plotType = "SideBySide",colorVar = as.factor(foldMem),xAxisPlot = 1,yAxisPlot = 2,grid=F)
+```
+
+##Comparison Plots
+```{r}
+plot(contributionObject=contributionOb,plotType = "Comparison",xAxisPlot = 1,yAxisPlot = 2,grid=T)
+```
+
+##Full Plots
+```{r}
+plot(contributionObject=contributionOb,plotType = "Full",xAxisPlot = 1,yAxisPlot = 2,grid=T)
+```
+
+##CV Plots
+```{r}
+plot(contributionObject=contributionOb,plotType = "CV",xAxisPlot = 1,yAxisPlot = 2,grid=T)
+```
+
+
+
+
