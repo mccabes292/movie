@@ -2,7 +2,7 @@
 % Please edit documentation in R/makeMovieObject.R
 \name{makeMovieObject}
 \alias{makeMovieObject}
-\title{Create Contribution Plot Object}
+\title{Create MOVIE Object}
 \usage{
 makeMovieObject(fullContributions, cvContributions, foldMem, scaleType = "SD")
 }
@@ -13,13 +13,13 @@ makeMovieObject(fullContributions, cvContributions, foldMem, scaleType = "SD")
 
 \item{foldMem}{Vector of length equal to the number of samples, indicating in which fold the subjects had their contributions calculated}
 
-\item{scaleType}{Value of the type of scaling desired.  If the contributions are not clustered together, then "MAD" should be used instead of the default "SD".  See vignette for more details. \cr
+\item{scaleType}{Value of the type of scaling desired.  If the contributions are not clustered together, then "MAD" should be used instead of the default "SD".  See vignette for more details. \cr\cr
 "SD" - Standard Deviation \cr
 "MAD" - Median Absolute Deviation#'}
 }
 \value{
-An object which contains the standardized contributions for both the full and CV analysis as well as the fold membership which will be used for plotting.
+A `movie` object which contains the standardized contributions for both the full and CV analysis as well as the fold membership which will be used for plotting.
 }
 \description{
-To scale and flip contributions from a cross validation multi-omics analysis in order to be similar to the contributions from the full analysis.
+To scale and flip contributions from a cross validation multi-omics analysis in order to be align with the contributions from the full analysis.
 }
