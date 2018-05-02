@@ -3,7 +3,8 @@ Title: Multi Omics VIsualization of Experimental datatype contributions
 Version: 0.0.1
 Author: Sean McCabe, Dan-Yu Lin, Michael I. Love
 Maintainer: Sean McCabe <mccabes@live.unc.edu>
-Description: Creates multi 'omics contribution plots.
+Description: Creates multi 'Omics contribution plots.
+Imports: magrittr, cowplot, ggplot2
 Depends: R (>= 3.4.1)
 License: GPL-2
 Encoding: UTF-8
