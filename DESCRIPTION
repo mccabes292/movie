@@ -1,5 +1,5 @@
-Package: multiOmicsContributionPlot
-Title: Multi Omics Contribution Plots
+Package: movie
+Title: Multi Omics VIsualization of Experimental datatype contributions
 Version: 0.0.1
 Author: Sean McCabe, Dan-Yu Lin, Michael I. Love
 Maintainer: Sean McCabe <mccabes@live.unc.edu>

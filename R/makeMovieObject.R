@@ -1,16 +1,20 @@
 #' Create Contribution Plot Object
 #' 
-#' To standardize and adjust contributions from a cross validation multi-omics analysis where the contributions need to be standardized and weighted to have similar results with the full analysis.
-#' @param fullContributions List of unscaled "score vectors" for the analysis using all subjects.  The length of this list should be equivalent to the number of matrices that were used in the analysis and the length of each element should be n. 
-#' @param cvContributions List of unscaled "score vectors" for the cross validation analysis.  The length of this list should be equivalent to the number of matrices that were used in the analysis and the length of each element should be n.
-#' @param foldMem Vector of length n indicating in which fold the subjects had the scores calculated
+#' To scale and flip contributions from a cross validation multi-omics analysis in order to be similar to the contributions from the full analysis.
+#' @param fullContributions List of unscaled contributions for the analysis using all subjects.  The length of this list should be equivalent to the number of matrices that were used in the analysis and the length of each element within the list should be the number of samples. 
+#' @param cvContributions List of unscaled contributions for the cross validation analysis.  The dimensions of this list should be the same as the `fullContributions`.
+#' @param foldMem Vector of length equal to the number of samples, indicating in which fold the subjects had their contributions calculated
 #' @param scaleType Value of the type of scaling desired.  If the contributions are not clustered together, then "MAD" should be used instead of the default "SD".  See vignette for more details. \cr
 #' "SD" - Standard Deviation \cr
 #' "MAD" - Median Absolute Deviation#' 
-#' @return An object which contains standardized scores for both the full and CV analysis as well as the fold membership
-#' @examples 
-#' makecontributionPlotObject(fullContributions,cvContributions,foldMem)
-makeContributionPlotObject=function(fullContributions,cvContributions,foldMem,scaleType="SD"){
+#' @return A movie object which contains the standardized contributions for both the full and CV analysis as well as the fold membership which will be used for plotting.
+#' @importFrom graphics par plot plot.new
+#' @importFrom stats cor mad sd
+#' @importFrom utils read.csv
+#' @importFrom magrittr %>%
+#' @importFrom cowplot plot_grid
+#' @importFrom ggplot2 ggplot aes xlab ylab ggtitle geom_point
+makeMovieObject=function(fullContributions,cvContributions,foldMem,scaleType="SD"){
   if(length(fullContributions)!=length(cvContributions)){stop("Length of Full and CV Scores are not equal")}
   if(is.null(names(fullContributions))){stop("fullContributions does not have a label")}
   if(is.null(names(cvContributions))){stop("cvContributions does not have a label")}
@@ -29,6 +33,6 @@ makeContributionPlotObject=function(fullContributions,cvContributions,foldMem,sc
   names(scaledcvContributions)=names(cvContributions) 
   names(scaledFull)=names(fullContributions)
   objList=list("fullContributions"=scaledFull,"cvContributions"=scaledcvContributions,"membership"=foldMem)
-  class(objList)<-"contributionPlotObject"
+  class(objList)<-"movie"
   return(objList)
 }

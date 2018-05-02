@@ -8,10 +8,9 @@ output:
     toc: true
     toc_float: true
 abstract: |
-  *apeglm* provides empirical Bayes shrinkage estimators for effect sizes for a
-  variety of GLM models; *apeglm* stands for "Approximate Posterior
+  *movie* creates contribution plots for the evaluation of Multi-Omics methods used for variance classification; *movie* stands for "Multi-Omics VIsualization of Experimental datatype contributions"
   Estimation for GLM".
-  apeglm package version: `r packageVersion("apeglm")`
+  movie package version: `r packageVersion("movie")`
 bibliography: library.bib
 vignette: |
   %\VignetteIndexEntry{Creating Contribution Plots}
@@ -20,7 +19,7 @@ vignette: |
 ---
 
 
-The first step of constructing a Contribution Plot is to conduct a CV analysis of whatever method is desired.  Please consult our Cross Validation Analysis Vignette for example code on how to conduct this type of analysis for PCCCA, Sparse mCCA, AJIVE, and MOFA.  Once this analysis is complete, you need to create a `contributionPlotObject` utilizing the `makeContributionPlotObject()` function.  This will scale the contributions within each fold to ensure that the contributions are consistent.  
+The first step of constructing a Contribution Plot is to conduct a CV analysis of whatever method is desired.  Please consult our Cross Validation Analysis Vignette for example code on how to conduct this type of analysis for PCCCA, Sparse mCCA, AJIVE, and MOFA.  Once this analysis is complete, you need to create a `contributionPlotObject` utilizing the `makeMovieObject()` function.  This will scale the contributions within each fold to ensure that the contributions are consistent.  
 
 
 #Preparing The Results
@@ -45,29 +44,29 @@ cvContribution_MCCA=list("CNV"=cvContribution_CNV_MCCA,"RNA"=cvContribution_RNA_
 #Creating a Contribution plot object
 
 ```{r}
-contributionOb=makeContributionPlotObject(fullContributions =fullContribution_MCCA,cvContributions = cvContribution_MCCA,foldMem = foldMem)
+movieOb=makeMovieObject(fullContributions =fullContribution_MCCA,cvContributions = cvContribution_MCCA,foldMem = foldMem)
 ```
 
 
 #Making a Contribution Plot
 ##Side By Side Plots
 ```{r}
-plot(contributionObject=contributionOb,plotType = "SideBySide",colorVar = as.factor(foldMem),xAxisPlot = 1,yAxisPlot = 2,grid=F)
+plot(movieObject=movieOb,plotType = "SideBySide",colorVar = as.factor(foldMem),xAxisPlot = 1,yAxisPlot = 2,grid=F)
 ```
 
 ##Comparison Plots
 ```{r}
-plot(contributionObject=contributionOb,plotType = "Comparison",xAxisPlot = 1,yAxisPlot = 2,grid=T)
+plot(movieObject=movieOb,plotType = "Comparison",xAxisPlot = 1,yAxisPlot = 2,grid=T)
 ```
 
 ##Full Plots
 ```{r}
-plot(contributionObject=contributionOb,plotType = "Full",xAxisPlot = 1,yAxisPlot = 2,grid=T)
+plot(movieObject=movieOb,plotType = "Full",xAxisPlot = 1,yAxisPlot = 2,grid=T)
 ```
 
 ##CV Plots
 ```{r}
-plot(contributionObject=contributionOb,plotType = "CV",xAxisPlot = 1,yAxisPlot = 2,grid=T)
+plot(movieObject=movieOb,plotType = "CV",xAxisPlot = 1,yAxisPlot = 2,grid=T)
 ```
 
 

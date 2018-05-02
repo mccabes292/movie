@@ -2,7 +2,7 @@
 #' 
 #' Function utilizing plot which makes a contribution plot
 #' 
-#' @param ContributionObject Object of class ContributionPlotObject
+#' @param movieObject Object of class ContributionPlotObject
 #' @param plotType Specifies the type of plot to be generated
 #' \code{"CV"} - CV Contribution/Score Plot - (k-1) X (k-1) upper triangular grid where $plot_{i,j}$ Corresponds to the Contribution/score plot for matrix j+1 (x-axis) and i (y-axis)\cr\cr
 #' \code{"Full"} - Full Contribution/Score Plot - Same gridded plot as above but now for the full scores i.e. the scores from the full analysis\cr\cr
@@ -14,10 +14,10 @@
 #' @param colorVar Variable by which points can be colored by. If NA then no color will be given. This is only used if \code{Grid=F}
 #'
 
-plot.contributionPlotObject=function(contributionObject,plotType,xAxisPlot,yAxisPlot,colorVar=NULL,grid){
+plot.movie=function(movieObject,plotType,xAxisPlot,yAxisPlot,colorVar=NULL,grid){
   if(grid==T){
-    plotContributionPlotGrid(contributionObject,plotType)  
+    plotMoviePlotGrid(movieObject,plotType)  
   }else{
-    plotContributionPlots(contributionObject,plotType,xAxisPlot,yAxisPlot,colorVar)
+    plotMoviePlots(movieObject,plotType,xAxisPlot,yAxisPlot,colorVar)
   }
 }

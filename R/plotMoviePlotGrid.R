@@ -2,7 +2,7 @@
 #'
 #'This function creates a grid of plots to help validate the effectiveness and the extent of over fitting for multi-omics methods.
 #'
-#'@param contributionObject Output of makeContributionPlotObject()
+#'@param movieObject Output of makeContributionPlotObject()
 #'@param plotType  Specifies which plots to make \cr\cr
 #' \code{"CV"} - CV contribution/Score Plot - (k-1) X (k-1) upper triangular grid where $plot_{i,j}$ Corresponds to the contribution/score plot for matrix j+1 (x-axis) and i (y-axis)\cr\cr
 #' \code{"Full"} - Full contribution/Score Plot - Same gridded plot as above but now for the full scores i.e. the scores from the full analysis\cr\cr
@@ -10,17 +10,17 @@
 #'
 #'
 #'
-plotContributionPlotGrid=function(contributionObject,plotType){
+plotMoviePlotGrid=function(movieObject,plotType){
  
-  if(length(contributionObject)!=3){
-    stop("Invalid contribution object")
+  if(length(movieObject)!=3){
+    stop("Invalid Movie object")
   }
   if(!(plotType %in% c("CV","Full","Comparison"))){
     stop("Invalid plot type")
   }
-  scaledFull=contributionObject[[1]]
-  scaledCVScores=contributionObject[[2]]
-  idMem=contributionObject[[3]]
+  scaledFull=movieObject[[1]]
+  scaledCVScores=movieObject[[2]]
+  idMem=movieObject[[3]]
   if(plotType=="CV"){
     ###Code for CV contribution plots
     par(mfrow=c(length(scaledCVScores)-1,length(scaledCVScores)-1))

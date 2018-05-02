@@ -142,7 +142,7 @@ names(fullScores)=c("RNA","miRNA")
 names(cvScores)=c("RNA","miRNA")
 names(foldMem)="Fold"
 
-t1=makeContributionPlotObject(fullScores,cvScores,foldMem)
+t1=makeMovieObject(fullScores,cvScores,foldMem)
 plot(t1,"SideBySide",xAxisPlot=1,yAxisPlot=2,colorVar=as.factor(foldMem),grid=F)
 
 ```
@@ -171,7 +171,7 @@ cvContribution_miRNA_MCCA=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Metho
 
 
 
-t1=makeContributionPlotObject(list("CNV"=fullContribution_CNV_MCCA[,1],"RNA"=fullContribution_RNA_MCCA[,1],"miRNA"=fullContribution_miRNA_MCCA[,1]),list("CNV"=cvContribution_CNV_MCCA[,1],"RNA"=cvContribution_RNA_MCCA[,1],"miRNA"=cvContribution_miRNA_MCCA[,1]),foldMem=as.vector(foldMem[,1]))
+t1=makeMovieObject(list("CNV"=fullContribution_CNV_MCCA[,1],"RNA"=fullContribution_RNA_MCCA[,1],"miRNA"=fullContribution_miRNA_MCCA[,1]),list("CNV"=cvContribution_CNV_MCCA[,1],"RNA"=cvContribution_RNA_MCCA[,1],"miRNA"=cvContribution_miRNA_MCCA[,1]),foldMem=as.vector(foldMem[,1]))
 
 plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(foldMem[,1]))
 plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
@@ -219,7 +219,7 @@ cvScoreAjive=list("CNV"=cvScore_CNV_AJIVE,"RNA"=cvScore_RNA_AJIVE,"miRNA"=cvScor
 
 
 
-t1=makeContributionPlotObject(fullScoreAJIVE,cvScoreAjive,foldMem=as.vector(foldMem[,1]))
+t1=makeMovieObject(fullScoreAJIVE,cvScoreAjive,foldMem=as.vector(foldMem[,1]))
 
 
 plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(foldMem[,1]))
@@ -272,7 +272,7 @@ cvScoreMOFA=list("CNV"=cvScore_CNV_MOFA,"RNA"=cvScore_RNA_MOFA,"miRNA"=cvScore_m
 
 
 
-t1=makeContributionPlotObject(fullScoreMOFA,cvScoreMOFA,foldMem=as.vector(foldMem[,1]))
+t1=makeMovieObject(fullScoreMOFA,cvScoreMOFA,foldMem=as.vector(foldMem[,1]))
 
 plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(foldMem[,1]))
 plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 3,grid=F, colorVar=as.factor(foldMem[,1]))
@@ -367,12 +367,12 @@ for(i in 1:kFold){
 rs1Perm=rowSums(score1Perm,na.rm=T)
 rs2Perm=rowSums(score2Perm,na.rm=T)
 
-permCV=list("rna"=rs1Perm,"mirna"=rs2Perm)
+permCV=list("RNA"=rs1Perm,"miRNA"=rs2Perm)
 
-fullScoresPerm=list("rna"=fullScore1Perm,"mirna"=fullScore2Perm)
+fullScoresPerm=list("RNA"=fullScore1Perm,"miRNA"=fullScore2Perm)
 
 
-t1=makeContributionPlotObject(fullScoresPerm,permCV,foldMem)
+t1=makeMovieObject(fullScoresPerm,permCV,foldMem)
 plot(t1,"SideBySide",xAxisPlot=1,yAxisPlot=2,colorVar=as.factor(foldMem[,1]),grid=F)
 plot(t1,"Comparison",xAxisPlot=2,yAxisPlot=2,colorVar=as.factor(foldMem[,1]),grid=T)
 
@@ -407,7 +407,7 @@ cvScoresMCCAPerm=list("RNA"=cvScore_RNA_MCCA_Perm,"miRNA"=cvScore_miRNA_MCCA_Per
 fullScoresMCCAPerm=list("RNA"=fullScore_RNA_MCCA_Perm$V1,"miRNA"=fullScore_miRNA_MCCA_Perm$V1)
 
 
-t1=makeContributionPlotObject(fullScoresMCCAPerm,cvScoresMCCAPerm,foldMem=as.vector(foldMem[,1]))
+t1=makeMovieObject(fullScoresMCCAPerm,cvScoresMCCAPerm,foldMem=as.vector(foldMem[,1]))
 
 #plot(t1,"CV",xAxisPlot = 1,yAxisPlot = 2,grid=T, colorVar=as.factor(foldMem[,1]))
 plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(foldMem[,1]))
@@ -447,7 +447,7 @@ cvScoreAjivePerm=list("RNA"=cvScore_RNA_AJIVE_Perm,"miRNA"=cvScore_miRNA_AJIVE_P
 
 
 
-t1=makeContributionPlotObject(fullScoreAJIVEPerm,cvScoreAjivePerm,foldMem=as.vector(foldMem[,1]))
+t1=makeMovieObject(fullScoreAJIVEPerm,cvScoreAjivePerm,foldMem=as.vector(foldMem[,1]))
 
 
 plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(foldMem[,1]))
@@ -489,7 +489,7 @@ cvScore_miRNA_MOFA_Perm=rowSums(cvScore_miRNA_MOFA_Mat_Perm,na.rm=T)
 
 cvScoreMOFAPerm=list("RNA"=cvScore_RNA_MOFA_Perm,"miRNA"=cvScore_miRNA_MOFA_Perm)
 
-t1=makeContributionPlotObject(fullScoreMOFAPerm,cvScoreMOFAPerm,as.vector(foldMem[,1]))
+t1=makeMovieObject(fullScoreMOFAPerm,cvScoreMOFAPerm,as.vector(foldMem[,1]))
 
 plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(foldMem[,1]))
 
@@ -580,7 +580,7 @@ cvScore_Mut_MCCA_Clust=read.table("C:/Sean/UNC/Mike Love/pccca/Packages/Methods/
 
 
 
-t1=makeContributionPlotObject(list("CNV"=fullScore_CNV_MCCA_Clust[,1],"RNA"=fullScore_RNA_MCCA_Clust[,1],"Mut"=fullScore_Mut_MCCA_Clust[,1]),list("CNV"=cvScore_CNV_MCCA_Clust[,1],"RNA"=cvScore_RNA_MCCA_Clust[,1],"Mut"=cvScore_Mut_MCCA_Clust[,1]),foldMem=as.vector(clustFold[,1]))
+t1=makeMovieObject(list("CNV"=fullScore_CNV_MCCA_Clust[,1],"RNA"=fullScore_RNA_MCCA_Clust[,1],"Mut"=fullScore_Mut_MCCA_Clust[,1]),list("CNV"=cvScore_CNV_MCCA_Clust[,1],"RNA"=cvScore_RNA_MCCA_Clust[,1],"Mut"=cvScore_Mut_MCCA_Clust[,1]),foldMem=as.vector(clustFold[,1]))
 
 plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(clustFold[,1]))
 plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 3,grid=F, colorVar=as.factor(clustFold[,1]))
@@ -629,7 +629,7 @@ cvScoreAjive_Clust=list("CNV"=cvScore_CNV_AJIVE_Clust,"RNA"=cvScore_RNA_AJIVE_Cl
 
 
 
-t1=makeContributionPlotObject(fullScoreAJIVE_Clust,cvScoreAjive_Clust,foldMem=as.vector(clustFold[,1]))
+t1=makeMovieObject(fullScoreAJIVE_Clust,cvScoreAjive_Clust,foldMem=as.vector(clustFold[,1]))
 
 
 plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(clustFold[,1]))
@@ -683,7 +683,7 @@ cvScoreMOFA_Clust=list("CNV"=cvScore_CNV_MOFA_Clust,"RNA"=cvScore_RNA_MOFA_Clust
 
 
 
-t1=makeContributionPlotObject(fullScoreMOFA_Clust,cvScoreMOFA_Clust,foldMem=as.vector(clustFold[,1]))
+t1=makeMovieObject(fullScoreMOFA_Clust,cvScoreMOFA_Clust,foldMem=as.vector(clustFold[,1]))
 
 
 plot(t1,"SideBySide",xAxisPlot = 1,yAxisPlot = 2,grid=F, colorVar=as.factor(clustFold[,1]))
