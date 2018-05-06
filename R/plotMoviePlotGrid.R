@@ -47,11 +47,9 @@ plotMoviePlotGrid=function(movieObject,plotType){
   }
   if(plotType=="Comparison"){
     ###Code for CV vs Full Scores Plot
-    low=floor(sqrt(length(scaledCVScores)))
-    print(low)
+    low=round(sqrt(length(scaledCVScores)))
     high=ceiling(sqrt(length(scaledCVScores)))
-    print(high)
-    par(mfrow=c(high,high))
+    par(mfrow=c(low,high))
     
     for(i in 1:length(scaledCVScores)){
       corTemp=cor(scaledCVScores[[i]],scaledFull[[i]],use="complete.obs")

@@ -5,7 +5,7 @@
 \title{Make Contribution Plot}
 \usage{
 \method{plot}{movie}(movieObject, plotType, xAxisPlot, yAxisPlot,
-  colorVar = NULL, grid)
+  colorVar = NULL, grid, colorVarLabel = NULL)
 }
 \arguments{
 \item{movieObject}{Object of class `movie`}

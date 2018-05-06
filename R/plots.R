@@ -14,10 +14,10 @@
 #' @param colorVar Variable by which points can be colored by. If NA then no color will be given. This is only used if \code{Grid=F}
 #'
 
-plot.movie=function(movieObject,plotType,xAxisPlot,yAxisPlot,colorVar=NULL,grid){
+plot.movie=function(movieObject,plotType,xAxisPlot,yAxisPlot,colorVar=NULL,grid,colorVarLabel=NULL){
   if(grid==T){
     plotMoviePlotGrid(movieObject,plotType)  
   }else{
-    plotMoviePlots(movieObject,plotType,xAxisPlot,yAxisPlot,colorVar)
+    plotMoviePlots(movieObject,plotType,xAxisPlot,yAxisPlot,colorVar,colorVarLabel)
   }
 }

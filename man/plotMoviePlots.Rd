@@ -4,7 +4,8 @@
 \alias{plotMoviePlots}
 \title{Create contribution Plots}
 \usage{
-plotMoviePlots(movieObject, plotType, xAxisPlot, yAxisPlot, colorVar = NULL)
+plotMoviePlots(movieObject, plotType, xAxisPlot, yAxisPlot, colorVar = NULL,
+  colorVarLabel = NULL)
 }
 \arguments{
 \item{movieObject}{Object generated from \code{makeMovieObject()}}
@@ -20,6 +21,8 @@ plotMoviePlots(movieObject, plotType, xAxisPlot, yAxisPlot, colorVar = NULL)
 \item{yAxisPlot}{Index for which matrix should lie on the y-axis}
 
 \item{colorVar}{Variable by which points can be colored by. If NA then no color will be given}
+
+\item{colorVarLabel}{Label to add to the legend.}
 }
 \value{
 Specified plot.
