@@ -1,5 +1,5 @@
 ---
-title: "Contribution Plots"
+title: "Creating Contribution Plots with MOVIE"
 date: "`r format(Sys.Date(), '%m/%d/%Y')`"
 author: "Sean D. McCabe, Danyu Lin, and Michael I. Love"
 output:
@@ -11,12 +11,18 @@ abstract: |
   *movie* creates contribution plots for the evaluation of Multi-Omics methods used for variance classification; *movie* stands for "Multi-Omics VIsualization of Experimental datatype contributions"
   Estimation for GLM".
   movie package version: `r packageVersion("movie")`
-bibliography: library.bib
 vignette: |
   %\VignetteIndexEntry{Creating Contribution Plots}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
 
 
 The first step of constructing a Contribution Plot is to conduct a CV analysis of whatever method is desired.  Please consult our Cross Validation Analysis Vignette for example code on how to conduct this type of analysis for PCCCA, Sparse mCCA, AJIVE, and MOFA.  Once this analysis is complete, you need to create a `movieObject` utilizing the `makeMovieObject()` function.  This will scale the contributions within each fold to ensure that the contributions are consistent.  
@@ -32,9 +38,9 @@ library(ggplot2)
 library(devtools)
 library(magrittr)
 library(cowplot)
-load_all()
 
-load("C:/Sean/UNC/Mike Love/pccca/Packages/mccares.RData")
+
+data(mccares)
 fullContribution_MCCA=list("CNV"=fullContribution_CNV_MCCA,"RNA"=fullContribution_RNA_MCCA,"miRNA"=fullContribution_miRNA_MCCA)
 cvContribution_MCCA=list("CNV"=cvContribution_CNV_MCCA,"RNA"=cvContribution_RNA_MCCA,"miRNA"=cvContribution_miRNA_MCCA)
 ```

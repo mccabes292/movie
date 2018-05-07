@@ -16,7 +16,6 @@
 #' 
 #' @return Specified plot.
 #' 
-#' @examples plotContributionPlots(movieObject,plotType,xAxisPlot,colorVar)
 plotMoviePlots=function(movieObject,plotType,xAxisPlot,yAxisPlot,colorVar=NULL,colorVarLabel=NULL){
   if(class(movieObject)!="movie"){
     stop("Not a 'movie' object")

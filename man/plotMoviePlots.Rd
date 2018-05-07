@@ -30,6 +30,3 @@ Specified plot.
 \description{
 To create an individual plot from the grid produced by \code{plotMovieGrid()}
 }
-\examples{
-plotContributionPlots(movieObject,plotType,xAxisPlot,colorVar)
-}

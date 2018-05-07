@@ -14,7 +14,7 @@
 #' @importFrom magrittr %>%
 #' @importFrom cowplot plot_grid
 #' @importFrom ggplot2 ggplot aes xlab ylab ggtitle geom_point
-#' 
+#' @importFrom dplyr group_by
 makeMovieObject=function(fullContributions,cvContributions,foldMem,scaleType="SD"){
   if(length(fullContributions)!=length(cvContributions)){stop("Length of Full and CV Scores are not equal")}
   if(is.null(names(fullContributions))){stop("fullContributions does not have a label")}
