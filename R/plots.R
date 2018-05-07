@@ -11,8 +11,9 @@
 #'
 #' @param xAxisPlot Index for which matrix should lie on the x-axis.  This is only used if \code{Grid=F}.
 #' @param yAxisPlot Index for which matrix should lie on the y-axis.  This is only used if \code{Grid=F}.
+#' @param grid  T or F corresponding if you want a grid of plots or an individual plot.
 #' @param colorVar Variable by which points can be colored by. If NA then no color will be given. This is only used if \code{Grid=F}
-#'
+#' @param colorVarLabel String to label the legend.
 
 plot.movie=function(movieObject,plotType,xAxisPlot,yAxisPlot,colorVar=NULL,grid,colorVarLabel=NULL){
   if(grid==T){

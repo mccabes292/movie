@@ -21,6 +21,10 @@
 \item{yAxisPlot}{Index for which matrix should lie on the y-axis.  This is only used if \code{Grid=F}.}
 
 \item{colorVar}{Variable by which points can be colored by. If NA then no color will be given. This is only used if \code{Grid=F}}
+
+\item{grid}{T or F corresponding if you want a grid of plots or an individual plot.}
+
+\item{colorVarLabel}{String to label the legend.}
 }
 \description{
 Function utilizing plot which makes a contribution plot
