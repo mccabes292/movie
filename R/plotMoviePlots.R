@@ -80,17 +80,14 @@ plotMoviePlots=function(movieObject,plotType,xAxisPlot,yAxisPlot,colorVar=NULL,c
     if(!is.null(colorVar)){
       p2=p2+geom_point(aes(color=(colorVar)))+labs(color=colorVarLabel)+theme(legend.position="none")
     }else{
-      p2=p2+geom_point()+theme(legend.position="none")
+      p2=p2+geom_point()
     }
     
-    
-    if(!is.null(colorVar)){
-      m1=plot_grid(p1,p2,leg,ncol=3)
-      print(m1)
-    }else{
-      m1=plot_grid(p1,p2,ncol=2)
-      print(m1)
-    }
+
+    m1=plot_grid(p1,p2,leg,ncol=3,rel_widths = c(3, 3,.5))
+    print(m1)
+   
+  
   
   }
 }
