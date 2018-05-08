@@ -35,9 +35,9 @@ First the full and cross validated contributions must be in labeled lists.  The 
 
 ```{r,message=F}
 library(ggplot2)
-library(devtools)
 library(magrittr)
 library(cowplot)
+library(movie)
 
 
 data(mccares)

@@ -16,6 +16,7 @@
 #' 
 #' @return Specified plot.
 #' 
+#' 
 plotMoviePlots=function(movieObject,plotType,xAxisPlot,yAxisPlot,colorVar=NULL,colorVarLabel=NULL){
   if(class(movieObject)!="movie"){
     stop("Not a 'movie' object")
