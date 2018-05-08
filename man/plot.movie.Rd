@@ -4,11 +4,11 @@
 \alias{plot.movie}
 \title{Make Contribution Plot}
 \usage{
-\method{plot}{movie}(movieObject, plotType, xAxisPlot, yAxisPlot,
-  colorVar = NULL, grid, colorVarLabel = NULL)
+\method{plot}{movie}(x, plotType, xAxisPlot, yAxisPlot, colorVar = NULL, grid,
+  colorVarLabel = NULL, ...)
 }
 \arguments{
-\item{movieObject}{Object of class `movie`}
+\item{x}{Object of class `movie`}
 
 \item{plotType}{Specifies the type of plot to be generated
 \code{"CV"} - CV Analysis Contribution Plot \cr\cr
@@ -25,6 +25,8 @@
 \item{grid}{T or F corresponding if you want a grid of plots or an individual plot.}
 
 \item{colorVarLabel}{String to label the legend.}
+
+\item{...}{other parameters to be passed through to plotting functions.}
 }
 \description{
 Function utilizing plot which makes a contribution plot

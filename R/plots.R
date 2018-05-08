@@ -2,7 +2,7 @@
 #' 
 #' Function utilizing plot which makes a contribution plot
 #' 
-#' @param movieObject Object of class `movie`
+#' @param x Object of class `movie`
 #' @param plotType Specifies the type of plot to be generated
 #' \code{"CV"} - CV Analysis Contribution Plot \cr\cr
 #' \code{"Full"} - Full Analysis Contribution Plot \cr\cr
@@ -14,10 +14,11 @@
 #' @param grid  T or F corresponding if you want a grid of plots or an individual plot.
 #' @param colorVar Variable by which points can be colored by. If NA then no color will be given. This is only used if \code{Grid=F}
 #' @param colorVarLabel String to label the legend.
-#' 
+#' @param ... other parameters to be passed through to plotting functions.
 #' @export
 
-plot.movie=function(movieObject,plotType,xAxisPlot,yAxisPlot,colorVar=NULL,grid,colorVarLabel=NULL){
+plot.movie=function(x,plotType,xAxisPlot,yAxisPlot,colorVar=NULL,grid,colorVarLabel=NULL,...){
+  movieObject=x
   if(grid==T){
     plotMoviePlotGrid(movieObject,plotType)  
   }else{

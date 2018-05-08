@@ -11,6 +11,7 @@ abstract: |
   *movie* creates contribution plots for the evaluation of Multi-Omics methods used for variance classification; *movie* stands for "Multi-Omics VIsualization of Experimental datatype contributions"
   Estimation for GLM".
   movie package version: `r packageVersion("movie")`
+
 vignette: |
   %\VignetteIndexEntry{Creating Contribution Plots}
   %\VignetteEngine{knitr::rmarkdown}
@@ -25,11 +26,10 @@ knitr::opts_chunk$set(
 ```
 
 
-The first step of constructing a Contribution Plot is to conduct a CV analysis of whatever method is desired.  Please consult our Cross Validation Analysis Vignette for example code on how to conduct this type of analysis for PCCCA, Sparse mCCA, AJIVE, and MOFA.  Once this analysis is complete, you need to create a `movieObject` utilizing the `makeMovieObject()` function.  This will scale the contributions within each fold to ensure that the contributions are consistent.  
-
 
 #Preparing The Results
-First the full and cross validated contributions must be in labeled lists.  The elements of both lists must be labeled or else an error will be returned.  The vectors corresponding to the full and cross validated contributions are available for Sparse mCCA to demonstrate the implementation of MOVIE.  
+  The first step of constructing a Contribution Plot is to conduct a cross validated analysis of whichever method is desired.  Please consult our *[Cross Validation Analysis Vignette](inst/long_vignettes/CVAnalysisWorkflow.html) for example code on how to conduct this type of analysis for PCCCA, Sparse mCCA, AJIVE, and MOFA.  Once this analysis is complete, you need to create a `movieObject` utilizing the `makeMovieObject()` function.  This will scale the contributions within each fold to ensure that the contributions are consistent. 
+  After conducting a cross validation analysis, the full and cross validated contributions must be in labeled lists.  The elements of both lists must be labeled or else an error will be returned.  The vectors corresponding to the full and cross validated contributions are available for Sparse mCCA to demonstrate the implementation of MOVIE.  
 
 
 
@@ -39,7 +39,6 @@ library(magrittr)
 library(cowplot)
 library(movie)
 
-
 data(mccares)
 fullContribution_MCCA=list("CNV"=fullContribution_CNV_MCCA,"RNA"=fullContribution_RNA_MCCA,"miRNA"=fullContribution_miRNA_MCCA)
 cvContribution_MCCA=list("CNV"=cvContribution_CNV_MCCA,"RNA"=cvContribution_RNA_MCCA,"miRNA"=cvContribution_miRNA_MCCA)
@@ -47,7 +46,7 @@ cvContribution_MCCA=list("CNV"=cvContribution_CNV_MCCA,"RNA"=cvContribution_RNA_
 
 
 
-#Creating a Contribution plot object
+#Creating a MOVIE object
 After the full and cross validated analyses are collected in lists, it is time to construct the `movie` object.  `makeMovieObject()` requires both the full and cross validated contributions as well as a vector corresponding to the fold membership of each sample, which indicates which fold the sample contribution was calculated.  Each sample should only be included in one fold.  The resulting object can now be used to construct plots for visualization. 
 
 ```{r}
@@ -56,12 +55,12 @@ movieOb=makeMovieObject(fullContributions =fullContribution_MCCA,cvContributions
 
 
 #Making a Contribution Plot
-All plots other than the side by side plot can be constructed in a grid for all data types or in an individual plot.  For exploration, the grid feature can give a quick look, however the individual plots are more aesthetically pleasing and allow the user to color the points by whatever value they would like.  `plot` has been modified to be able to accomodate the `movie` object.  Required parameters are the `movie` object, a `plotType`, and specifying if you would like a grid or individual plots.  If plotting an individual plot, the user must specify which data type will be plotted on the x and y axes and a coloring variable may also be passed indicated by `colorVar`.  Any variable can be used but we recommend first coloring by fold to examine if there are any trends within a particular fold.  Below are examples for all available plot types.  
+All plots other than the side by side plot can be constructed in a grid for all data types or in an individual plot.  For exploration, the grid feature can give a quick look, however the individual plots are more aesthetically pleasing and allow the user to color the points by whatever value they would like.  `plot` has been modified to be able to accommodate the `movie` object.  Required parameters are the `movie` object, a `plotType`, and specifying if you would like a grid or individual plots.  If plotting an individual plot, the user must specify which data type will be plotted on the x and y axes and a coloring variable may also be passed indicated by `colorVar`.  Any variable can be used but we recommend first coloring by fold to examine if there are any trends within a particular fold.  Below are examples for all available plot types.  
 
 ##Side By Side Plots
 Side by side plots are the most useful plots MOVIE has to offer.  The left panel corresponds to the full contribution plot, while the right panel is the cross validated contribution plot.  Comparing these plots is a way to determine if the biological result is being over fit.  Side by side plots are the only plots that `MOVIE` can't construct in a grid.  
 ```{r}
-plot(movieObject=movieOb,plotType = "SideBySide",xAxisPlot=1,yAxisPlot=2,colorVar = as.factor(foldMem),grid=F,colorVarLabel="Fold")
+plot(movieOb,plotType = "SideBySide",xAxisPlot=1,yAxisPlot=2,colorVar = as.factor(foldMem),grid=F,colorVarLabel="Fold")
 
 
 ```
@@ -69,25 +68,25 @@ plot(movieObject=movieOb,plotType = "SideBySide",xAxisPlot=1,yAxisPlot=2,colorVa
 ##Comparison Plots
 Comparison plots compare the contributions for the cross validated analysis with the contributions of the full analysis.  The desired result for this plot a positively high correlated plot.  This indicates that the sampling order stayed the same in both analyses and that the method is not overly influenced by the inclusion or exclusion of samples from the analysis.  Below are sample code for making all of the plots in a grid as well as making an individual plot and coloring the points by fold.
 ```{r}
-plot(movieObject=movieOb,plotType = "Comparison",grid=T)
+plot(movieOb,plotType = "Comparison",grid=T)
 
-plot(movieObject=movieOb,plotType = "Comparison",xAxisPlot = 1,yAxisPlot = 2,grid=T,colorVar=as.factor(foldMem),colorVarLabel="Fold")
+plot(movieOb,plotType = "Comparison",xAxisPlot = 1,yAxisPlot = 2,grid=T,colorVar=as.factor(foldMem),colorVarLabel="Fold")
 ```
 
 ##Full Plots
 The full plots correspond the left panel of the side by side plots.  These plots are a quick way to view the relationship between data types without the implementation of a cross validation analysis.  Below is code for making both grid and individual plots.
 ```{r}
-plot(movieObject=movieOb,plotType = "Full",grid=T)
+plot(movieOb,plotType = "Full",grid=T)
 
-plot(movieObject=movieOb,plotType = "Full",xAxisPlot = 1,yAxisPlot = 2,grid=F,colorVar=as.factor(foldMem),colorVarLabel="Fold")
+plot(movieOb,plotType = "Full",xAxisPlot = 1,yAxisPlot = 2,grid=F,colorVar=as.factor(foldMem),colorVarLabel="Fold")
 ```
 
 ##CV Plots
 The CV plots correspond to the right panel of the side by side plots.  Below is code for making both grid and individual plots.
 ```{r}
-plot(movieObject=movieOb,plotType = "CV",grid=T)
+plot(movieOb,plotType = "CV",grid=T)
 
-plot(movieObject=movieOb,plotType = "CV",xAxisPlot = 1,yAxisPlot = 2,grid=F,colorVar=as.factor(foldMem),colorVarLabel="Fold")
+plot(movieOb,plotType = "CV",xAxisPlot = 1,yAxisPlot = 2,grid=F,colorVar=as.factor(foldMem),colorVarLabel="Fold")
 ```
 
 
