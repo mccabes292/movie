@@ -28,7 +28,7 @@ knitr::opts_chunk$set(
 
 
 #Preparing The Results
-  The first step of constructing a Contribution Plot is to conduct a cross validated analysis of whichever method is desired.  Please consult our *[Cross Validation Analysis Vignette](inst/long_vignettes/CVAnalysisWorkflow.html) for example code on how to conduct this type of analysis for PCCCA, Sparse mCCA, AJIVE, and MOFA.  Once this analysis is complete, you need to create a `movieObject` utilizing the `makeMovieObject()` function.  This will scale the contributions within each fold to ensure that the contributions are consistent. 
+  The first step of constructing a Contribution Plot is to conduct a cross validated analysis of whichever method is desired.  Please consult our [Cross Validation Analysis Vignette](https://htmlpreview.github.io/?https://github.com/mccabes292/movie/blob/master/inst/long_vignettes/CVAnalysisWorkflow.html) for example code on how to conduct this type of analysis for PCCCA, Sparse mCCA, AJIVE, and MOFA.  Once this analysis is complete, you need to create a `movieObject` utilizing the `makeMovieObject()` function.  This will scale the contributions within each fold to ensure that the contributions are consistent. 
   After conducting a cross validation analysis, the full and cross validated contributions must be in labeled lists.  The elements of both lists must be labeled or else an error will be returned.  The vectors corresponding to the full and cross validated contributions are available for Sparse mCCA to demonstrate the implementation of MOVIE.  
 
 
