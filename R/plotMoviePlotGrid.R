@@ -1,15 +1,4 @@
-#'Grid of contribution Plots
-#'
-#'This function creates a grid of plots to help validate the effectiveness and the extent of over fitting for multi-omics methods.
-#'
-#'@param movieObject Output of makeContributionPlotObject()
-#'@param plotType  Specifies which plots to make \cr\cr
-#' \code{"CV"} - CV contribution/Score Plot - (k-1) X (k-1) upper triangular grid where $plot_{i,j}$ Corresponds to the contribution/score plot for matrix j+1 (x-axis) and i (y-axis)\cr\cr
-#' \code{"Full"} - Full contribution/Score Plot - Same gridded plot as above but now for the full scores i.e. the scores from the full analysis\cr\cr
-#' \code{"Comparison"} - Matrix Specific Score Plots - k plots (k is the number of matrices in the analysis) which plot the scores for the CV analysis vs. the scores for the full analysis\cr\cr
-#'
-#'
-#'
+
 plotMoviePlotGrid=function(movieObject,plotType){
  
   if(length(movieObject)!=3){
@@ -19,16 +8,16 @@ plotMoviePlotGrid=function(movieObject,plotType){
     stop("Invalid plot type")
   }
   scaledFull=movieObject[[1]]
-  scaledCVScores=movieObject[[2]]
+  scaledCV=movieObject[[2]]
   idMem=movieObject[[3]]
   if(plotType=="CV"){
     ###Code for CV contribution plots
-    par(mfrow=c(length(scaledCVScores)-1,length(scaledCVScores)-1))
-    for(i in 1:(length(scaledCVScores)-1)){
+    par(mfrow=c(length(scaledCV)-1,length(scaledCV)-1))
+    for(i in 1:(length(scaledCV)-1)){
       replicate(i-1,plot.new())
-      for(j in (i+1):length(scaledCVScores)){
-        corTemp=cor(scaledCVScores[[j]],scaledCVScores[[i]],use="complete.obs")
-        plot(scaledCVScores[[j]],scaledCVScores[[i]],xlab=paste(names(scaledCVScores)[j]," (CV)",sep=""),ylab=paste(names(scaledCVScores)[i]," (CV)",sep=""),main=paste("Cor: ",round(corTemp,4),sep=""),asp=1)
+      for(j in (i+1):length(scaledCV)){
+        corTemp=cor(scaledCV[[j]],scaledCV[[i]],use="complete.obs")
+        plot(scaledCV[[j]],scaledCV[[i]],xlab=paste(names(scaledCV)[j]," (CV)",sep=""),ylab=paste(names(scaledCV)[i]," (CV)",sep=""),main=paste("Cor: ",round(corTemp,4),sep=""),asp=1)
       }
       
     }
@@ -47,13 +36,13 @@ plotMoviePlotGrid=function(movieObject,plotType){
   }
   if(plotType=="Comparison"){
     ###Code for CV vs Full Scores Plot
-    low=round(sqrt(length(scaledCVScores)))
-    high=ceiling(sqrt(length(scaledCVScores)))
+    low=round(sqrt(length(scaledCV)))
+    high=ceiling(sqrt(length(scaledCV)))
     par(mfrow=c(low,high))
     
-    for(i in 1:length(scaledCVScores)){
-      corTemp=cor(scaledCVScores[[i]],scaledFull[[i]],use="complete.obs")
-      plot(scaledCVScores[[i]],scaledFull[[i]],xlab=paste(names(scaledCVScores)[i]," (CV)",sep=""),ylab=paste(names(scaledCVScores)[i]," (Full)",sep=""),main=paste("Cor:  ",round(corTemp,4),sep=""),asp=1)
+    for(i in 1:length(scaledCV)){
+      corTemp=cor(scaledCV[[i]],scaledFull[[i]],use="complete.obs")
+      plot(scaledCV[[i]],scaledFull[[i]],xlab=paste(names(scaledCV)[i]," (CV)",sep=""),ylab=paste(names(scaledCV)[i]," (Full)",sep=""),main=paste("Cor:  ",round(corTemp,4),sep=""),asp=1)
     }
   }
 }

@@ -1,22 +1,4 @@
-#' Create contribution Plots
-#' 
-#' To create an individual plot from the grid produced by \code{plotMovieGrid()}
-#' 
-#' @param movieObject Object generated from \code{makeMovieObject()}
-#' @param plotType Specifies the type of plot to be generated
-#' \code{"CV"} - Cross Validated contribution Plot - (k-1) X (k-1) upper triangular grid where $plot_{i,j}$ Corresponds to the contribution/score plot for matrix j+1 (x-axis) and i (y-axis)\cr\cr
-#' \code{"Full"} - Full contribution Plot - Same gridded plot as above but now for the full scores i.e. the scores from the full analysis\cr\cr
-#' \code{"Comparison"} - Matrix Specific contribution Plots - k plots (k is the number of matrices in the analysis) which plot the contributions for the CV analysis vs. the scores for the full analysis\cr\cr
-#' \code{"SideBySide"} - Side by side plot of the CV and Full Plots
-#'
-#' @param xAxisPlot Index for which matrix should lie on the x-axis
-#' @param yAxisPlot Index for which matrix should lie on the y-axis
-#' @param colorVar Variable by which points can be colored by. If NA then no color will be given
-#' @param colorVarLabel Label to add to the legend.
-#' 
-#' @return Specified plot.
-#' 
-#' 
+
 plotMoviePlots=function(movieObject,plotType,xAxisPlot,yAxisPlot,colorVar=NULL,colorVarLabel=NULL){
   if(class(movieObject)!="movie"){
     stop("Not a 'movie' object")

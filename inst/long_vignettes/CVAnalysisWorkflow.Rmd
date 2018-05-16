@@ -1,7 +1,7 @@
 ---
-title: "CV Analysis"
+title: "Cross Validation Analysis"
 author: "Sean McCabe"
-date: "April 17, 2018"
+date: "`r format(Sys.Date(), '%m/%d/%Y')`"
 output: html_document
 ---
 

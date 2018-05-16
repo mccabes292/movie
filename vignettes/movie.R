@@ -25,7 +25,7 @@ plot(movieOb,plotType = "SideBySide",xAxisPlot=1,yAxisPlot=2,colorVar = as.facto
 ## ------------------------------------------------------------------------
 plot(movieOb,plotType = "Comparison",grid=T)
 
-plot(movieOb,plotType = "Comparison",xAxisPlot = 1,yAxisPlot = 2,grid=T,colorVar=as.factor(foldMem),colorVarLabel="Fold")
+plot(movieOb,plotType = "Comparison",xAxisPlot = 1,yAxisPlot = 2,grid=F,colorVar=as.factor(foldMem),colorVarLabel="Fold")
 
 ## ------------------------------------------------------------------------
 plot(movieOb,plotType = "Full",grid=T)
