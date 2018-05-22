@@ -61,14 +61,17 @@ plotMoviePlots=function(movieObject,plotType,xAxisPlot,yAxisPlot,colorVar=NULL,c
     p2=ggplot(data.frame("t1"=scaledCVScores[[xAxisPlot]],"t2"=scaledCVScores[[yAxisPlot]]),aes(t1,t2))+xlab(paste(names(scaledCVScores)[xAxisPlot]," (CV)",sep=""))+ylab(paste(names(scaledCVScores)[yAxisPlot]," (CV)",sep=""))+coord_fixed(ratio=1)+ggtitle(paste("Cor: ",round(corTemp,4),sep=""))
     if(!is.null(colorVar)){
       p2=p2+geom_point(aes(color=(colorVar)))+labs(color=colorVarLabel)+theme(legend.position="none")
+      m1=plot_grid(p1,p2,ncol=2,align="h")
+      m2=plot_grid(m1,leg,ncol=2,rel_widths = c(6,.5))
+      print(m2)
     }else{
       p2=p2+geom_point()
+      m1=plot_grid(p1,p2,ncol=2,align="h")
+      print(m1)
     }
     
+  
 
-    m1=plot_grid(p1,p2,leg,ncol=3,rel_widths = c(3, 3,.5))
-    print(m1)
-   
   
   
   }

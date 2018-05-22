@@ -19,6 +19,9 @@
 
 plot.movie=function(x,plotType,xAxisPlot,yAxisPlot,colorVar=NULL,grid,colorVarLabel=NULL,...){
   movieObject=x
+  if((plotType=="SideBySide")&(missing(grid)) ){
+    grid=F
+  }
   if(grid==T){
     plotMoviePlotGrid(movieObject,plotType)  
   }else{

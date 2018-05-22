@@ -9,9 +9,9 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="author" content="Sean D. McCabe, Danyu Lin, and Michael I. Love" />
+<meta name="author" content="Sean D. McCabe, Dan-Yu Lin, and Michael I. Love" />
 
-<meta name="date" content="2018-05-14" />
+<meta name="date" content="2018-05-16" />
 
 <title>Creating Contribution Plots with MOVIE</title>
 
@@ -254,8 +254,8 @@ div.tocify {
 
 
 <h1 class="title toc-ignore">Creating Contribution Plots with MOVIE</h1>
-<h4 class="author"><em>Sean D. McCabe, Danyu Lin, and Michael I. Love</em></h4>
-<h4 class="date"><em>05/14/2018</em></h4>
+<h4 class="author"><em>Sean D. McCabe, Dan-Yu Lin, and Michael I. Love</em></h4>
+<h4 class="date"><em>05/16/2018</em></h4>
 <div class="abstract">
 <p class="abstract">Abstract</p>
 <p><em>movie</em> creates contribution plots for the evaluation of Multi-Omics methods used for variance classification; <em>movie</em> stands for “Multi-Omics VIsualization of Experimental datatype contributions” Estimation for GLM“. movie package version: 0.0.1</p>
@@ -266,7 +266,7 @@ div.tocify {
 
 <div id="preparing-the-results" class="section level1">
 <h1>Preparing The Results</h1>
-<p>The first step of constructing a Contribution Plot is to conduct a cross validated analysis of whichever method is desired. Please consult our <a href="https://htmlpreview.github.io/?https://github.com/mccabes292/movie/blob/master/inst/long_vignettes/CVAnalysisWorkflow.html">Cross Validation Analysis Vignette</a> for example code on how to conduct this type of analysis for PCCCA, Sparse mCCA, AJIVE, and MOFA. Once this analysis is complete, you need to create a <code>movieObject</code> utilizing the <code>makeMovieObject()</code> function. This will scale the contributions within each fold to ensure that the contributions are consistent. After conducting a cross validation analysis, the full and cross validated contributions must be in labeled lists. The elements of both lists must be labeled or else an error will be returned. The vectors corresponding to the full and cross validated contributions are available for Sparse mCCA to demonstrate the implementation of MOVIE.</p>
+<p>The first step of constructing a Contribution Plot is to conduct a cross validated analysis of whichever method is desired. Please consult our <a href="https://htmlpreview.github.io/?https://github.com/mccabes292/movie/blob/master/inst/long_vignettes/CVAnalysisWorkflow.html">Cross Validation Analysis Vignette</a> for example code on how to conduct this type of analysis for PC-CCA, Sparse mCCA, AJIVE, and MOFA. Once this analysis is complete, you need to create a <code>movieObject</code> utilizing the <code>makeMovieObject()</code> function. This will scale the contributions within each fold to ensure that the contributions are consistent. After conducting a cross validation analysis, the full and cross validated contributions must be in labeled lists. The elements of both lists must be labeled or else an error will be returned. The vectors corresponding to the full and cross validated contributions are available for Sparse mCCA to demonstrate the implementation of MOVIE.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggplot2)
 <span class="kw">library</span>(magrittr)
 <span class="kw">library</span>(cowplot)
