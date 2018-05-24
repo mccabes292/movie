@@ -12,8 +12,8 @@
 #' @importFrom stats cor mad sd
 #' @importFrom utils read.csv
 #' @importFrom magrittr %>%
-#' @importFrom cowplot plot_grid
-#' @importFrom ggplot2 ggplot aes xlab ylab ggtitle geom_point
+#' @importFrom cowplot plot_grid get_legend
+#' @importFrom ggplot2 ggplot aes xlab ylab ggtitle geom_point coord_fixed labs theme
 #' @importFrom dplyr group_by
 #' 
 #' @export
