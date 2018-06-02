@@ -8,8 +8,7 @@ output:
     toc: true
     toc_float: true
 abstract: |
-  *movie* creates contribution plots for the evaluation of Multi-Omics methods used for variance classification; *movie* stands for "Multi-Omics VIsualization of Experimental datatype contributions"
-  Estimation for GLM".
+  *movie* scales contributions from a cross validation analysis to create contribution and comparison plots for the evaluation of variance classification methods using multi-mics data. *movie* stands for "Multi-Omics VIsualization of Experimental datatype contributions".
   movie package version: `r packageVersion("movie")`
 
 vignette: |

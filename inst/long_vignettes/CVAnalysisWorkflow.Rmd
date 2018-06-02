@@ -2,14 +2,18 @@
 title: "Cross Validation Analysis"
 author: "Sean McCabe"
 date: "`r format(Sys.Date(), '%m/%d/%Y')`"
-output: html_document
+output:
+  rmarkdown::html_document:
+    highlight: pygments
+    toc: true
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE,
+  comment = "#>")
 ```
 
-#Cross Validation Analysis Workflow
 This vignette provides guidance for how to conduct a cross validation analysis for PCCCA, Sparse mCCA, AJIVE, and MOFA.  Please note that many of these methods are computationally intensive and should not be run interactively.  Additionally, it is recommended that the analysis be separated into separate jobs for each of the folds in order to finish the analysis in a reasonable amount of time.  We also recommend that you read the vignettes and software documentation for all of these methods and ensure that you are catering each method towards your data appropriately.  For the following workflow, we will be using breast cancer data from The Cancer Genome Atlas.  Included data types are RNA, miRNA, and Copy Number Variation.  The data is available [here](http://dlin.web.unc.edu/software/iboost/).
 
 #Dividing data into K Folds
@@ -30,8 +34,8 @@ for(i in 1:kFold){
 
 `foldMem` now corresponds to the fold in which each sample is left out and will therefore be included in the testing set.  We can now begin calculating the full and cross validation contributions for each of the four methods.
 
-
-#PC-CCA
+#Methods
+##PC-CCA
 PC-CCA involves a simple Canonical Correlation Analysis on the top specified number of PCs which will be indicated in our code as `numPC`.  Determining the number of PCs to include in such an analysis is an area which is widely debated but one of the methods of thresholding is by selecting the number of components which correspond to the "elbow" of the scree plot.  For this analysis we will be greedy in our selection of this number and will choose 100.  Please note that this may not be a wise choice for your own data.  Unfortunately CCA is a method that can only be conducted on two matrices and therefore we will use RNA and miRNA for this analysis.  The only additional software package we need is the `CCA` package available through CRAN.
 
 First we will obtain the full analysis contributions for each of our three data matrices.
@@ -49,7 +53,7 @@ fullContributionmiRNA_PCCCA=t(t(cc1$ycoef[,1])%*%t(pc2$x[,1:numPC]))
 fullContribution_PCCCA=list("RNA"=fullContributionRNA_PCCCA,"miRNA"=fullContributionmiRNA_PCCCA)
 ```
 
-We now proceed in obtaining the Cross Validated Contributions in the following manner.  If you are interested in the weights for each of the folds, you can modify the below code to accommodate this.
+We now proceed in obtaining the Cross Validated Contributions in the following manner.  If you are interested in the weights for each of the folds, you can modify the below code to accommodate this.  Conducting this PC-CCA analysis took approximately 15 seconds using a standard laptop computer.
 
 ```{r,eval=F}
 pc1Mat=pc1$x[,1:numPC]
@@ -89,7 +93,7 @@ cvContribution_PCCCA=list("RNA"=cvContributionRNA_PCCCA,"miRNA"=cvContributionmi
 ```
 
 
-#Sparse mCCA
+##Sparse mCCA
 The pipeline for Sparse mCCA is analogous to PCCCA, however now we can include our third data matrix (CNV).  Software for Sparse mCCA is available through CRAN in the `PMA` package and we encourage you to read their [documentation](https://cran.r-project.org/web/packages/PMA/index.html) to ensure that you are analyzing your data in the correct manner.
 
 As in PCCCA, we first aim to obtain the full weights.  Note that Sparse mCCA requires that the samples be on the rows and the features to be on the columns. 
@@ -111,7 +115,7 @@ fullContribution_miRNA_MCCA=moData[[3]]%*%fullMCCA2$ws[[3]]
 fullContribution_MCCA=list("CNV"=fullContribution_CNV_MCCA,"RNA"=fullContribution_RNA_MCCA,"miRNA"=fullContribution_miRNA_MCCA)
 ```
 
-Next we will proceed with finding the Cross Validated Contribution.  While the computation time for this step may not be overly burdensome to run on a cluster, it may be wise to separate each fold into a separate job to speed up the analysis.
+Next we will proceed with finding the Cross Validated Contribution.  While the computation time for this step may not be overly burdensome to run on a cluster, it may be wise to separate each fold into a separate job to speed up the analysis.  This entire job (all folds) took approximately 1 hour and 40 minutes to complete using a computing cluster.
 
 ```{r,eval=F}
 
@@ -151,7 +155,7 @@ cvContribution_MCCA=list("CNV"=cvContribution_CNV_MCCA,"RNA"=cvContribution_RNA_
 
 ```
 
-#AJIVE
+##AJIVE
 
 To conduct a Cross Validation analysis with AJIVE, we will utilize two of AJIVE's built in functions `get_block_scores()` and `get_block_loadings()`  which in this context will correspond to the contributions and contribution weights for the specified data type.  One requirement for AJIVE is the declaration of the desired ranks for each matrix.  This is done similarly to the PCCCA analysis, however we will try to be more careful when selecting these ranks and will thus choose 25, 50, and 50 for CNV, RNA, and miRNA respectively.  We will assume that these ranks will hold for all folds in this analysis.  We will only be examining the first vector of contributions, however this code can be easily modified to incorporate multiple if that is desired.  The code for calculating the contributions from the full analysis is below.  Please consult the AJIVE [paper](https://arxiv.org/abs/1704.02060) and [documentation](https://github.com/idc9/r_jive) for a more thorough explanation of their method.
 ```{r,eval=F}
@@ -167,7 +171,7 @@ fullContribution_miRNA_AJIVE=get_block_scores(fullJiveDec,3,"joint",normalized =
 fullContribution_AJIVE=list("CNV"=fullContribution_CNV_AJIVE,"RNA"=fullContribution_RNA_AJIVE,"miRNA"=fullContribution_miRNA_AJIVE)
 ```
 
-We now proceed with the calculation of the cross validated contributions.  The loadings will correspond to the weights which will allow us to calculate our contributions.  Again, this is not a quick method and thus it is advised to split the analysis for each fold into a separate job.    
+We now proceed with the calculation of the cross validated contributions.  The loadings will correspond to the weights which will allow us to calculate our contributions.  Again, this is not a quick method and thus it is advised to split the analysis for each fold into a separate job.  The computation time for one fold was approximately 40 minutes using a computing cluster.    
 
 ```{r,eval=F}
 x1=moData[[1]]
@@ -221,7 +225,7 @@ cvContribution_AJIVE=list("CNV"=cvContribution_CNV_AJIVE,"RNA"=cvContribution_RN
 
 
 
-#MOFA
+##MOFA
 [MOFA](https://www.biorxiv.org/content/early/2017/11/10/217554) is a Bayesian Factor Analysis method which can identify weights for each data type corresponding to each hidden factor.  To construct a contribution plot, one must select one single hidden factor of interest.  We acknowledge that only selecting one hidden factor may not correctly capture the entirety of what MOFA is capturing, however the purpose of the contribution plot is to identify whether a method is over fitting and whether the results are stable when a subset of the samples are removed from the analysis.  This analysis will aims to identify whether or not the first hidden factor is not over fit.  As with AJIVE, we would expect the correlations from the contribution plots to be lower because there are more hidden factors which may account for the remaining variation between data types.  Therefore, the correlations provided with a correlation plot are not able to be compared across methods, but rather the change in correlations from the full analysis to the cross validated analysis within a method are of interest.
 
 First, we obtain the full contribution for each data type as follows.  Note that for MOFA, samples are on the columns and features are on the rows.  Please consult the MOFA [github](https://github.com/bioFAM/MOFA) page for more details on how to run an analysis with MOFA.
@@ -254,7 +258,7 @@ fullContribution_MOFA=list("CNV"=fullContribution_CNV_MOFA,"RNA"=fullContributio
 ````
 
 
-Next we will obtain the cross validated contributions as follows.  As with previous methods, this is a very computational intensive step and it is not advised that you run the following code as is.  It is recommended that you divided each fold into a separate job and run simultaneously.
+Next we will obtain the cross validated contributions as follows.  As with previous methods, this is a very computational intensive step and it is not advised that you run the following code as is.  It is recommended that you divided each fold into a separate job and run simultaneously.  One fold took approximately 2 hours and 20 minutes to complete using a computing cluster.
 
 ```{r,eval=F}
 
