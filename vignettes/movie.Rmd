@@ -57,7 +57,7 @@ All plots other than the side by side plot can be constructed in a grid for all 
 ##Side By Side Plots
 Side by side plots are the most useful plots MOVIE has to offer.  The left panel corresponds to the full contribution plot, while the right panel is the cross validated contribution plot.  Comparing these plots is a way to determine if the biological result is being over fit.  Side by side plots are the only plots that `MOVIE` can't construct in a grid.  
 ```{r}
-plot(movieOb,plotType = "SideBySide",xAxisPlot=1,yAxisPlot=2,colorVar = as.factor(foldMem),grid=F,colorVarLabel="Fold")
+plot(movieOb,plotType = "SideBySide",xAxisPlot=1,yAxisPlot=2,colorVar = as.factor(foldMem),grid=FALSE,colorVarLabel="Fold")
 
 
 ```
@@ -65,25 +65,25 @@ plot(movieOb,plotType = "SideBySide",xAxisPlot=1,yAxisPlot=2,colorVar = as.facto
 ##Comparison Plots
 Comparison plots compare the contributions for the cross validated analysis with the contributions of the full analysis.  The desired result for this plot a positively high correlated plot.  This indicates that the sampling order stayed the same in both analyses and that the method is not overly influenced by the inclusion or exclusion of samples from the analysis.  Below are sample code for making all of the plots in a grid as well as making an individual plot and coloring the points by fold.
 ```{r}
-plot(movieOb,plotType = "Comparison",grid=T)
+plot(movieOb,plotType = "Comparison",grid=TRUE)
 
-plot(movieOb,plotType = "Comparison",xAxisPlot = 1,yAxisPlot = 2,grid=F,colorVar=as.factor(foldMem),colorVarLabel="Fold")
+plot(movieOb,plotType = "Comparison",xAxisPlot = 1,yAxisPlot = 2,grid=FALSE,colorVar=as.factor(foldMem),colorVarLabel="Fold")
 ```
 
 ##Full Plots
 The full plots correspond the left panel of the side by side plots.  These plots are a quick way to view the relationship between data types without the implementation of a cross validation analysis.  Below is code for making both grid and individual plots.
 ```{r}
-plot(movieOb,plotType = "Full",grid=T)
+plot(movieOb,plotType = "Full",grid=TRUE)
 
-plot(movieOb,plotType = "Full",xAxisPlot = 1,yAxisPlot = 2,grid=F,colorVar=as.factor(foldMem),colorVarLabel="Fold")
+plot(movieOb,plotType = "Full",xAxisPlot = 1,yAxisPlot = 2,grid=FALSE,colorVar=as.factor(foldMem),colorVarLabel="Fold")
 ```
 
 ##CV Plots
 The CV plots correspond to the right panel of the side by side plots.  Below is code for making both grid and individual plots.
 ```{r}
-plot(movieOb,plotType = "CV",grid=T)
+plot(movieOb,plotType = "CV",grid=TRUE)
 
-plot(movieOb,plotType = "CV",xAxisPlot = 1,yAxisPlot = 2,grid=F,colorVar=as.factor(foldMem),colorVarLabel="Fold")
+plot(movieOb,plotType = "CV",xAxisPlot = 1,yAxisPlot = 2,grid=FALSE,colorVar=as.factor(foldMem),colorVarLabel="Fold")
 ```
 
 

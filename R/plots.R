@@ -20,9 +20,9 @@
 plot.movie=function(x,plotType,xAxisPlot,yAxisPlot,colorVar=NULL,grid,colorVarLabel=NULL,...){
   movieObject=x
   if((plotType=="SideBySide")&(missing(grid)) ){
-    grid=F
+    grid=FALSE
   }
-  if(grid==T){
+  if(grid==TRUE){
     plotMoviePlotGrid(movieObject,plotType)  
   }else{
     plotMoviePlots(movieObject,plotType,xAxisPlot,yAxisPlot,colorVar,colorVarLabel)
