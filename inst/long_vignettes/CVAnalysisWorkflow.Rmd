@@ -1,5 +1,5 @@
 ---
-title: "Cross Validation Analysis"
+title: "Cross-Validation Analysis"
 author: "Sean McCabe"
 date: "`r format(Sys.Date(), '%m/%d/%Y')`"
 output:
