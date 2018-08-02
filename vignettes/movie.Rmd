@@ -63,17 +63,17 @@ plot(movieOb,plotType = "SideBySide",xAxisPlot=1,yAxisPlot=2,colorVar = as.facto
 
 ##Comparison Plots
 Comparison plots compare the contributions for the cross validated analysis with the contributions of the full analysis.  The desired result for this plot a positively high correlated plot.  This indicates that the sampling order stayed the same in both analyses and that the method is not overly influenced by the inclusion or exclusion of samples from the analysis.  Below are sample code for making all of the plots in a grid as well as making an individual plot and coloring the points by fold.
-```{r}
+```{r,fig=T}
 plot(movieOb,plotType = "Comparison",grid=TRUE)
-
+```
+```{r}
 plot(movieOb,plotType = "Comparison",xAxisPlot = 1,yAxisPlot = 2,grid=FALSE,colorVar=as.factor(foldMem),colorVarLabel="Fold")
 ```
 
 ##Full Plots
 The full plots correspond the left panel of the side by side plots.  These plots are a quick way to view the relationship between data types without the implementation of a cross validation analysis.  Below is code for making both grid and individual plots.
-```{r}
+```{r,fig=T}
 plot(movieOb,plotType = "Full",grid=TRUE)
-
 plot(movieOb,plotType = "Full",xAxisPlot = 1,yAxisPlot = 2,grid=FALSE,colorVar=as.factor(foldMem),colorVarLabel="Fold")
 ```
 
