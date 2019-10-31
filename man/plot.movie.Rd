@@ -4,8 +4,8 @@
 \alias{plot.movie}
 \title{Make Contribution Plot}
 \usage{
-\method{plot}{movie}(x, plotType, xAxisPlot, yAxisPlot, colorVar = NULL, grid,
-  colorVarLabel = NULL, ...)
+\method{plot}{movie}(x, plotType, xAxisPlot, yAxisPlot, colorVar = NULL,
+  grid, colorVarLabel = NULL, leg = TRUE, ...)
 }
 \arguments{
 \item{x}{Object of class `movie`}
@@ -14,7 +14,8 @@
 \code{"CV"} - CV Analysis Contribution Plot \cr\cr
 \code{"Full"} - Full Analysis Contribution Plot \cr\cr
 \code{"Comparison"} - Matrix Specific Score Plots \cr\cr
-\code{"SideBySide"} - Side by side plot of the CV and Full Plots - Not available if \code{Grid=T}.}
+\code{"SideBySide"} - Side by side plot of the CV and Full Plots - Not available if \code{Grid=T}.
+\code{"Line"} - Plots correlations in Full and CV analysis for all pairwise datatype comparisons.}
 
 \item{xAxisPlot}{Index for which matrix should lie on the x-axis.  This is only used if \code{Grid=F}.}
 
@@ -25,6 +26,8 @@
 \item{grid}{T or F corresponding if you want a grid of plots or an individual plot.}
 
 \item{colorVarLabel}{String to label the legend.}
+
+\item{leg}{T or F designating whether or legend will be displayed for the "Line" plot}
 
 \item{...}{other parameters to be passed through to plotting functions.}
 }

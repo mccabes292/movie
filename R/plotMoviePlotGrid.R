@@ -17,7 +17,7 @@ plotMoviePlotGrid=function(movieObject,plotType){
       replicate(i-1,plot.new())
       for(j in (i+1):length(scaledCV)){
         corTemp=cor(scaledCV[[j]],scaledCV[[i]],use="complete.obs")
-        plot(scaledCV[[j]],scaledCV[[i]],xlab=paste(names(scaledCV)[j]," (CV)",sep=""),ylab=paste(names(scaledCV)[i]," (CV)",sep=""),main=paste("Cor: ",round(corTemp,4),sep=""),asp=1)
+        plot(scaledCV[[j]],scaledCV[[i]],xlab=paste(names(scaledCV)[j]," (CV)",sep=""),bty="L",pch=16,cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,ylab=paste(names(scaledCV)[i]," (CV)",sep=""),main=paste("Cor: ",round(corTemp,4),sep=""),asp=1)
       }
       
     }
@@ -29,7 +29,7 @@ plotMoviePlotGrid=function(movieObject,plotType){
       replicate(i-1,plot.new())
       for(j in (i+1):length(scaledFull)){
         corTemp=cor(scaledFull[[j]],scaledFull[[i]],use="complete.obs")
-        plot(scaledFull[[j]],scaledFull[[i]],xlab=paste(names(scaledFull)[j]," (Full)",sep=""),ylab=paste(names(scaledFull)[i]," (Full)",sep=""),main=paste("Cor: ",round(corTemp,4),sep=""),asp=1)
+        plot(scaledFull[[j]],scaledFull[[i]],xlab=paste(names(scaledFull)[j]," (Full)",sep=""),bty="L",pch=16,cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,ylab=paste(names(scaledFull)[i]," (Full)",sep=""),main=paste("Cor: ",round(corTemp,4),sep=""),asp=1)
       }
       
     }
@@ -42,7 +42,7 @@ plotMoviePlotGrid=function(movieObject,plotType){
     
     for(i in 1:length(scaledCV)){
       corTemp=cor(scaledCV[[i]],scaledFull[[i]],use="complete.obs")
-      plot(scaledCV[[i]],scaledFull[[i]],xlab=paste(names(scaledCV)[i]," (CV)",sep=""),ylab=paste(names(scaledCV)[i]," (Full)",sep=""),main=paste("Cor:  ",round(corTemp,4),sep=""),asp=1)
+      plot(scaledCV[[i]],scaledFull[[i]],xlab=paste(names(scaledCV)[i]," (CV)",sep=""),bty="L",pch=16,cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,ylab=paste(names(scaledCV)[i]," (Full)",sep=""),main=paste("Cor:  ",round(corTemp,4),sep=""),asp=1)
     }
   }
 }

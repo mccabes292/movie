@@ -46,7 +46,7 @@ cvContribution_MCCA=list("CNV"=cvContribution_CNV_MCCA,"RNA"=cvContribution_RNA_
 After the full and cross validated analyses are collected in lists, it is time to construct the `movie` object.  `makeMovieObject()` requires both the full and cross validated contributions as well as a vector corresponding to the fold membership of each sample, which indicates which fold the sample contribution was calculated.  Each sample should only be included in one fold.  The resulting object can now be used to construct plots for visualization. 
 
 ```{r}
-movieOb=makeMovieObject(fullContributions =fullContribution_MCCA,cvContributions = cvContribution_MCCA,foldMem = foldMem)
+movieOb=makeMovieObject(fullContributions =fullContribution_MCCA,cvContributions = cvContribution_MCCA,foldMem = foldMem,scaleType="SD")
 ```
 
 
@@ -86,5 +86,12 @@ plot(movieOb,plotType = "CV",xAxisPlot = 1,yAxisPlot = 2,grid=FALSE,colorVar=as.
 ```
 
 
+##Line Plots
+Line plots are useful for examining drops in correlations across all data types in one view. Only the line type parameter is required for making this figure. A legend can be removed with the `leg` parameter.
+
+```{r}
+plot(movieOb,plotType="Line")
+plot(movieOb,plotType="Line",leg=FALSE)
+```
 
 

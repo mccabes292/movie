@@ -12,25 +12,29 @@ fullContribution_MCCA=list("CNV"=fullContribution_CNV_MCCA,"RNA"=fullContributio
 cvContribution_MCCA=list("CNV"=cvContribution_CNV_MCCA,"RNA"=cvContribution_RNA_MCCA,"miRNA"=cvContribution_miRNA_MCCA)
 
 ## ------------------------------------------------------------------------
-movieOb=makeMovieObject(fullContributions =fullContribution_MCCA,cvContributions = cvContribution_MCCA,foldMem = foldMem)
+movieOb=makeMovieObject(fullContributions =fullContribution_MCCA,cvContributions = cvContribution_MCCA,foldMem = foldMem,scaleType="SD")
 
 ## ------------------------------------------------------------------------
 plot(movieOb,plotType = "SideBySide",xAxisPlot=1,yAxisPlot=2,colorVar = as.factor(foldMem),grid=FALSE,colorVarLabel="Fold")
 
 
 
-## ------------------------------------------------------------------------
+## ----fig=T---------------------------------------------------------------
 plot(movieOb,plotType = "Comparison",grid=TRUE)
 
+## ------------------------------------------------------------------------
 plot(movieOb,plotType = "Comparison",xAxisPlot = 1,yAxisPlot = 2,grid=FALSE,colorVar=as.factor(foldMem),colorVarLabel="Fold")
 
-## ------------------------------------------------------------------------
+## ----fig=T---------------------------------------------------------------
 plot(movieOb,plotType = "Full",grid=TRUE)
-
 plot(movieOb,plotType = "Full",xAxisPlot = 1,yAxisPlot = 2,grid=FALSE,colorVar=as.factor(foldMem),colorVarLabel="Fold")
 
 ## ------------------------------------------------------------------------
 plot(movieOb,plotType = "CV",grid=TRUE)
 
 plot(movieOb,plotType = "CV",xAxisPlot = 1,yAxisPlot = 2,grid=FALSE,colorVar=as.factor(foldMem),colorVarLabel="Fold")
+
+## ------------------------------------------------------------------------
+plot(movieOb,plotType="Line")
+plot(movieOb,plotType="Line",leg=FALSE)
 

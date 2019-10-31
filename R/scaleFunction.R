@@ -1,6 +1,6 @@
 
 
-scaleFunction=function(vec,full,scaleType="SD"){
+scaleFunction=function(vec,full,scaleType="SD",scaleFold=TRUE){
 
   corTemp=cor(vec,full,use="complete.obs")
   #print(corTemp)
@@ -8,6 +8,9 @@ scaleFunction=function(vec,full,scaleType="SD"){
     vec=vec*(-1)
   }
   
+  if(scaleFold==FALSE){
+    return(vec)
+  }
   mu=mean(vec)
   if(scaleType=="SD"){
     madVal=sd(vec)
@@ -15,6 +18,7 @@ scaleFunction=function(vec,full,scaleType="SD"){
   if(scaleType=="MAD"){
     madVal=mad(vec)
   }
+
   madFinal=ifelse(madVal==0,1,madVal)
   return((vec-mu)/madFinal)
 }

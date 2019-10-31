@@ -4,7 +4,8 @@
 \alias{makeMovieObject}
 \title{Create MOVIE Object}
 \usage{
-makeMovieObject(fullContributions, cvContributions, foldMem, scaleType = "SD")
+makeMovieObject(fullContributions, cvContributions, foldMem,
+  scaleType = "SD", scaleFold = FALSE)
 }
 \arguments{
 \item{fullContributions}{List of unscaled contributions for the analysis using all subjects.  The length of this list should be equivalent to the number of matrices that were used in the analysis and the length of each element within the list should be the number of samples.}
@@ -16,6 +17,8 @@ makeMovieObject(fullContributions, cvContributions, foldMem, scaleType = "SD")
 \item{scaleType}{Value of the type of scaling desired.  If the contributions are not clustered together, then "MAD" should be used instead of the default "SD".  See vignette for more details. \cr\cr
 "SD" - Standard Deviation \cr
 "MAD" - Median Absolute Deviation#'}
+
+\item{scaleFold}{TRUE or FALSE on whether or not scaling should be done within Fold. Default is FALSE}
 }
 \value{
 A `movie` object which contains the standardized contributions for both the full and CV analysis as well as the fold membership which will be used for plotting.
